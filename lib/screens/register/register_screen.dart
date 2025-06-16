@@ -117,7 +117,10 @@ class RegisterScreen extends StatelessWidget {
                       : const SizedBox.shrink();
                 }),
                 SizedBox(height: AppSize.heightBetweenTextField),
-                CountrySelectorField(controller: _countryController, focusNode: _countryFocusNode,),
+                CountrySelectorField(controller: _countryController,
+                  focusNode: _countryFocusNode,
+                  onSubmitted:(v) =>  _phoneFocusNode.requestFocus(),
+                ),
                 SizedBox(height: AppSize.heightBetweenTextField),
                 TextFieldWidget(
                   controller: _phoneController,

@@ -10,6 +10,7 @@ class CountrySelectorField extends StatefulWidget {
   final Color? borderColor;
   final Color? errorBorderColor;
   final bool errorBorder;
+  final ValueChanged<String>? onSubmitted;
 
   const CountrySelectorField({
     super.key,
@@ -19,6 +20,7 @@ class CountrySelectorField extends StatefulWidget {
     this.borderColor,
     this.errorBorderColor,
     this.errorBorder = false,
+    this.onSubmitted,
   });
 
   @override
@@ -41,6 +43,7 @@ class _CountrySelectorFieldState extends State<CountrySelectorField> {
       controller: widget.controller,
       focusNode: widget.focusNode,
       readOnly: true,
+      onSubmitted: widget.onSubmitted,
       style: TextStyle(
         fontSize: 15.sp,
         fontWeight: FontWeight.w400,
