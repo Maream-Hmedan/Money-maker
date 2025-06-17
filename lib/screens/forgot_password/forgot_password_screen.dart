@@ -30,7 +30,7 @@ class ForgotPasswordScreen extends StatelessWidget {
         key: _key,
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [

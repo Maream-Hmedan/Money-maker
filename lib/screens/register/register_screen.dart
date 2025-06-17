@@ -14,33 +14,53 @@ import 'package:money_maker/wigets/text_field_widget.dart';
 import 'package:sizer/sizer.dart';
 
 
-class RegisterScreen extends StatelessWidget {
-   RegisterScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+   const RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _nameController = TextEditingController();
+
   final FocusNode _nameFocusNode = FocusNode();
+
   final errorNameMessage = RxString('');
 
    final TextEditingController _countryController = TextEditingController();
+
    final FocusNode _countryFocusNode = FocusNode();
+
    final errorCountryMessage = RxString('');
-  
+
    final TextEditingController _emailController = TextEditingController();
+
    final FocusNode _emailFocusNode = FocusNode();
+
    final errorEmailMessage = RxString('');
 
    final TextEditingController _phoneController = TextEditingController();
+
    final FocusNode _phoneFocusNode = FocusNode();
+
    final errorPhoneMessage = RxString('');
 
   final TextEditingController _passController = TextEditingController();
+
   final FocusNode _passFocusNode = FocusNode();
+
   final errorPassMessage = RxString('');
 
    final TextEditingController _confirmPassController = TextEditingController();
+
    final FocusNode _confirmPassFocusNode = FocusNode();
+
    final errorConfirmPassMessage = RxString('');
 
   final GlobalKey<FormState> _key = GlobalKey();
+
+   String _dialCode = '+962';
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +69,7 @@ class RegisterScreen extends StatelessWidget {
         key: _key,
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -120,6 +140,10 @@ class RegisterScreen extends StatelessWidget {
                 CountrySelectorField(controller: _countryController,
                   focusNode: _countryFocusNode,
                   onSubmitted:(v) =>  _phoneFocusNode.requestFocus(),
+                  onCountryChanged: (country) {
+                    setState(() => _dialCode = '+${country.phoneCode}');
+                    _phoneController.clear();
+                  },
                 ),
                 SizedBox(height: AppSize.heightBetweenTextField),
                 TextFieldWidget(
@@ -127,6 +151,7 @@ class RegisterScreen extends StatelessWidget {
                   focusNode: _phoneFocusNode,
                   onSubmitted: (v) => _passFocusNode.requestFocus(),
                   keyboardType: TextInputType.phone,
+                  prefixText: '$_dialCode | ',
                   hint: 'Phone Number',
                   validator: (v) {
                     if (v == null || v.isEmpty) {
@@ -222,6 +247,7 @@ class RegisterScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Text("Already have an account? ", style: Styles().midText),
                   GestureDetector(
                       onTap: (){
                         AppNavigator.of(context).push(LoginScreen());
@@ -229,7 +255,30 @@ class RegisterScreen extends StatelessWidget {
                       child: Text("Sign In", style: Styles().mainText)),
                 ],),
                 SizedBox(height: 1.h,),
-                Text("By signing up, you agree to our Terms and Privacy Policy", style: Styles().bottomText),
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: Styles().bottomText,
+                children: [
+                  const TextSpan(text: 'By signing up, you agree to our '),
+
+                  TextSpan(
+                    text: 'Terms',
+                    style: Styles()
+                        .bottomText
+                        .copyWith(color: const Color(0xFF380E87)),
+                  ),
+
+                  const TextSpan(text: ' and '),
+                  TextSpan(
+                    text: 'Privacy Policy',
+                    style: Styles()
+                        .bottomText
+                        .copyWith(color: const Color(0xFF380E87)),
+                  ),
+                ],
+              ),
+            ),
                 SizedBox(height: 1.h,),
               ],
             ),

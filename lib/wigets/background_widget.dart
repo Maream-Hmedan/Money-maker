@@ -17,7 +17,7 @@ class CommonBackground extends StatelessWidget {
             minWidth: MediaQuery.of(context).size.width,
           ),
           child: Container(
-            color: AppColors.mainBackGroundColor,
+            color: AppColors.whiteColor,
             child: child,
           ),
         ),

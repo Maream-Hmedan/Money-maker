@@ -32,7 +32,7 @@ class LoginScreen extends StatelessWidget {
         key: _key,
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -42,15 +42,38 @@ class LoginScreen extends StatelessWidget {
                   height: AppSize.logoHeightSignUpLogIn,
                   fit: BoxFit.cover,
                 ),
-                Text('Welcome Back!', style: Styles().bigText),
+                Text('Log In', style: Styles().bigText),
                 SizedBox(height: AppSize.heightBetweenTextField),
                 TextFieldWidget(
                   controller: _firstFieldController,
                   focusNode: _firstFieldFocusNode,
                   keyboardType: TextInputType.emailAddress,
-                  hint: 'Email or Phone Number',
+                  hint: 'Email',
+                  prefixIcon: Icon(Icons.person),
                   onSubmitted: (v) => _passFocusNode.requestFocus(),
-                  validator: _emailOrPhoneValidator,
+                  validator: (v) {
+                    if (v == null || v.isEmpty) {
+                      errorFirstFieldMessage.value =
+                      "Please enter your valid email.";
+                      return "";
+                    }
+                    if (v.length < 5) {
+                      errorFirstFieldMessage.value =
+                      "Please enter your valid email.";
+                      return "";
+                    }
+                    if (v.contains(" ")) {
+                      errorFirstFieldMessage.value =
+                      "Please enter your valid email.";
+                      return "";
+                    }
+                    if (!isValidEmail(v)) {
+                      errorFirstFieldMessage.value =
+                      "Please enter your valid email.";
+                      return "";
+                    }
+                    return null;
+                  },
                 ),
                 Obx(() {
                   return errorFirstFieldMessage.isNotEmpty
@@ -61,6 +84,7 @@ class LoginScreen extends StatelessWidget {
                 TextFieldWidget(
                   controller: _passController,
                   focusNode: _passFocusNode,
+                  prefixIcon: Icon(Icons.lock),
                   keyboardType: TextInputType.multiline,
                   hint: 'Password',
                   onSubmitted: (v) => FocusManager.instance.primaryFocus?.unfocus(),
@@ -104,17 +128,20 @@ class LoginScreen extends StatelessWidget {
                       AppNavigator.of(context).push(HomeScreen());
                     }
                   },
-                  child: Text('Login', style: Styles().buttonText),
+                  child: Text('Log In', style: Styles().buttonText),
                 ),
                 SizedBox(height: AppSize.heightBetweenTextAndButton),
-                Text("Don't have an account?", style: Styles().midText),
-                GestureDetector(
-                  onTap: (){
-                    AppNavigator.of(context).push(RegisterScreen());
-                  },
-                  child: Text("Sign Up", style: Styles().mainText),
-                ),
-                // SizedBox(height: AppSize.heightLogoAndTextLogInSignUp),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                  Text("Don't have an account? ", style: Styles().midText),
+                  GestureDetector(
+                    onTap: (){
+                      AppNavigator.of(context).push(RegisterScreen());
+                    },
+                    child: Text("Sign Up", style: Styles().mainText),
+                  ),
+                ],),
               ],
             ),
           ),
@@ -123,26 +150,7 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  String? _emailOrPhoneValidator(String? v) {
-    if (v == null || v.trim().isEmpty) {
-      errorFirstFieldMessage.value = 'Please verify the input.';
-      return '';
-    }
 
-    final value = v.trim();
-    final bool isEmail = isValidEmail(value);
-    final bool isPhone =
-        value.length >= 9 &&
-        value.length <= 10 &&
-        RegExp(r'^\d+$').hasMatch(value);
-
-    if (!isEmail && !isPhone) {
-      errorFirstFieldMessage.value =
-          'Please enter a valid email address or phone number.';
-      return '';
-    }
-    return null;
-  }
 
   bool isValidEmail(String value) {
     const pattern = r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$';

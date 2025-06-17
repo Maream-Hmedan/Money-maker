@@ -7,28 +7,28 @@ class Styles {
     fontSize: 20.sp,
     fontWeight: FontWeight.bold,
     fontFamily: 'Futura',
-    color: Colors.white,
+    color: Colors.black,
   );
 
   TextStyle smallText =  TextStyle(
     fontSize: 16.sp,
     fontWeight: FontWeight.w400,
     fontFamily: 'Futura',
-    color: Color(0xFFE59200),
+    color: Colors.black,
   );
 
   TextStyle bottomText =  TextStyle(
-    fontSize: 13.sp,
+    fontSize: 14.sp,
     fontWeight: FontWeight.w600,
     fontFamily: 'Futura',
-    color: Colors.white70,
+    color: Colors.grey,
   );
 
   TextStyle midText =  TextStyle(
     fontSize: 17.sp,
     fontWeight: FontWeight.w500,
     fontFamily: 'Futura',
-    color: Colors.white,
+    color: Colors.black,
   );
 
   TextStyle mainText =  TextStyle(
@@ -42,12 +42,12 @@ class Styles {
     fontSize: 17.sp,
     fontWeight: FontWeight.w600,
     fontFamily: 'Futura',
-    color: Colors.white,
+    color: Colors.black,
   );
   TextStyle buttonText = TextStyle(
     fontSize: 18.sp,
     fontWeight: FontWeight.w800,
     fontFamily: 'Futura',
-    color: Color(0xFF380E87),
+    color: Colors.white,
   );
 }

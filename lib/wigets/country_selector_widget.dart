@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:country_picker/country_picker.dart';
-import 'package:money_maker/controllers/app_colors.dart';
+import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 class CountrySelectorField extends StatefulWidget {
@@ -11,6 +10,7 @@ class CountrySelectorField extends StatefulWidget {
   final Color? errorBorderColor;
   final bool errorBorder;
   final ValueChanged<String>? onSubmitted;
+  final ValueChanged<Country>? onCountryChanged;
 
   const CountrySelectorField({
     super.key,
@@ -21,6 +21,7 @@ class CountrySelectorField extends StatefulWidget {
     this.errorBorderColor,
     this.errorBorder = false,
     this.onSubmitted,
+    this.onCountryChanged,
   });
 
   @override
@@ -28,7 +29,6 @@ class CountrySelectorField extends StatefulWidget {
 }
 
 class _CountrySelectorFieldState extends State<CountrySelectorField> {
-
   @override
   void initState() {
     super.initState();
@@ -48,7 +48,7 @@ class _CountrySelectorFieldState extends State<CountrySelectorField> {
         fontSize: 15.sp,
         fontWeight: FontWeight.w400,
         fontFamily: 'Futura',
-        color: AppColors.whiteColor,
+        color: Colors.black,
       ),
       decoration: InputDecoration(
         contentPadding: EdgeInsets.symmetric(vertical: 2.5.h, horizontal: 3.w),
@@ -56,6 +56,8 @@ class _CountrySelectorFieldState extends State<CountrySelectorField> {
         alignLabelWithHint: true,
         errorStyle: const TextStyle(height: 0.01),
         filled: true,
+        suffixIcon: Icon(Icons.keyboard_arrow_down),
+        suffixIconColor: Colors.grey,
         fillColor: Colors.transparent,
         enabledBorder: _border(widget.radius, widget.borderColor),
         focusedBorder: _border(widget.radius, widget.borderColor),
@@ -82,12 +84,14 @@ class _CountrySelectorFieldState extends State<CountrySelectorField> {
             textStyle: const TextStyle(fontSize: 16),
             bottomSheetHeight: 500,
             inputDecoration: const InputDecoration(
-              prefixIcon: Icon(Icons.search,color: Colors.grey,),
+              prefixIcon: Icon(Icons.search, color: Colors.grey),
               border: OutlineInputBorder(),
             ),
           ),
           onSelect: (Country country) {
-            widget.controller.text = '${country.flagEmoji}  ${country.name}';
+            widget.controller.text =
+            '${country.flagEmoji}  ${country.name}';
+            widget.onCountryChanged?.call(country);
           },
         );
       },
@@ -97,9 +101,9 @@ class _CountrySelectorFieldState extends State<CountrySelectorField> {
   OutlineInputBorder _border(double? radius, Color? color) =>
       OutlineInputBorder(
         borderRadius: BorderRadius.circular(radius ?? 8),
-        borderSide: BorderSide(color: color ?? AppColors.borderTextFieldColor),
+        borderSide: BorderSide(
+          color: color ?? Colors.grey.shade200,
+          width: 1.5,
+        ),
       );
-
-
-  }
-
+}

@@ -76,7 +76,7 @@ class TextFieldWidget extends StatelessWidget {
         fontSize: 15.sp,
         fontWeight: FontWeight.w400,
         fontFamily: 'Futura',
-        color: textColor??AppColors.whiteColor,
+        color: textColor??Colors.black,
       ),
       decoration: InputDecoration(
         // paddings
@@ -96,19 +96,23 @@ class TextFieldWidget extends StatelessWidget {
         ),
         hintText: hint,
         hintStyle: TextStyle(
-          fontSize: 15.sp,
+          fontSize: 16.sp,
           fontWeight: FontWeight.w400,
           fontFamily: 'Futura',
-          color: hintColor??Colors.white70,
+          color: hintColor??Colors.grey,
         ),
         errorText: errorText,
         errorStyle: TextStyle(height: errorHeight ?? 0.01),
-        // icons
         prefixIcon: prefixIcon,
-        prefixIconColor: hintColor,
+        prefixIconColor: Color(0xFFE59200),
         suffixIcon: suffixIcon,
         prefix: Text(prefixText ?? ''),
-        // fill & borders
+        prefixStyle: TextStyle(
+          fontSize: 17.sp,
+          fontWeight: FontWeight.w400,
+          fontFamily: 'Futura',
+          color: Colors.black,
+        ),
         filled: true,
         fillColor: fillColor ?? Colors.transparent,
         enabledBorder: _border(radius, borderColor),
@@ -130,7 +134,6 @@ class TextFieldWidget extends StatelessWidget {
 
   OutlineInputBorder _border(double? radius, Color? color) => OutlineInputBorder(
     borderRadius: BorderRadius.circular(radius ?? 8),
-    borderSide: BorderSide(color: color ?? AppColors.borderTextFieldColor),
+    borderSide: BorderSide(color: color ?? Colors.grey.shade200,width: 1.5),
   );
 }
-
