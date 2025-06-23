@@ -175,6 +175,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _passController,
                   focusNode: _passFocusNode,
                   keyboardType: TextInputType.multiline,
+                  isObscure: true,
                   onSubmitted: (v) => _confirmPassFocusNode.requestFocus(),
                   hint: 'Password',
                   validator: (v) {

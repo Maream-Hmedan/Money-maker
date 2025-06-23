@@ -6,6 +6,7 @@ import 'package:money_maker/controllers/app_images.dart';
 import 'package:money_maker/controllers/app_navigation.dart';
 import 'package:money_maker/controllers/app_size.dart';
 import 'package:money_maker/controllers/styles.dart';
+import 'package:money_maker/screens/bottom_nav_bar/bottom_nav_bar_screen.dart';
 import 'package:money_maker/screens/forgot_password/forgot_password_screen.dart';
 import 'package:money_maker/screens/home/home_screen.dart';
 import 'package:money_maker/screens/register/register_screen.dart';
@@ -84,6 +85,7 @@ class LoginScreen extends StatelessWidget {
                 TextFieldWidget(
                   controller: _passController,
                   focusNode: _passFocusNode,
+                  isObscure: true,
                   prefixIcon: Icon(Icons.lock),
                   keyboardType: TextInputType.multiline,
                   hint: 'Password',
@@ -125,7 +127,7 @@ class LoginScreen extends StatelessWidget {
                     errorPassMessage.value = '';
                     errorFirstFieldMessage.value = '';
                     if (_key.currentState!.validate()) {
-                      AppNavigator.of(context).push(HomeScreen());
+                      AppNavigator.of(context).push(BottomNavBarScreen());
                     }
                   },
                   child: Text('Log In', style: Styles().buttonText),

@@ -4,22 +4,29 @@ import 'package:money_maker/controllers/app_colors.dart';
 
 class CommonBackground extends StatelessWidget {
   final Widget child;
+  final bool showAppBar;
 
-  const CommonBackground({super.key, required this.child});
+  const CommonBackground({
+    super.key,
+    required this.child,
+    this.showAppBar = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: MediaQuery.of(context).size.height,
-            minWidth: MediaQuery.of(context).size.width,
-          ),
-          child: Container(
-            color: AppColors.whiteColor,
-            child: child,
-          ),
+        appBar: showAppBar
+            ? AppBar(
+          backgroundColor: AppColors.whiteColor,
+          elevation: 0,
+        )
+            : null,
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          color: AppColors.whiteColor,
+          child: child,
         ),
       ),
     );

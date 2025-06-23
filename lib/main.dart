@@ -24,7 +24,10 @@ class MyApp extends StatelessWidget {
             ),
             child: child!,
           ),
-          title: 'Read & Listen App',
+          title: 'Money Maker',
+          theme: ThemeData(
+            fontFamily: 'Futura',
+          ),
           debugShowCheckedModeBanner: false,
           themeMode: ThemeMode.system,
           home:  const SplashScreen(),
