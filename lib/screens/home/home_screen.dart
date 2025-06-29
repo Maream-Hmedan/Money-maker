@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:money_maker/controllers/app_colors.dart';
 import 'package:money_maker/controllers/app_images.dart';
 import 'package:money_maker/controllers/app_navigation.dart';
+import 'package:money_maker/controllers/app_size.dart';
 import 'package:money_maker/screens/market_place/market_place_screen.dart';
+import 'package:money_maker/screens/portfolio/portfolio_screen.dart';
 import 'package:money_maker/screens/special_offers/special_offers_screen.dart';
-import 'package:money_maker/wigets/background_widget.dart';
-import 'package:money_maker/wigets/common_views.dart';
+import 'package:money_maker/screens/top/top_screen.dart';
+import 'package:money_maker/widgets/background_widget.dart';
+import 'package:money_maker/widgets/common_views.dart';
 import 'package:sizer/sizer.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -18,7 +21,12 @@ class HomeScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Image.asset(appLogo, width: 55.w, height: 22.h, fit: BoxFit.cover),
+            Image.asset(
+              appLogo,
+              width: AppSize.logoWidthCommon,
+              height: AppSize.logoHeightCommon,
+              fit: BoxFit.cover,
+            ),
             CommonViews().customContainer(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -77,13 +85,13 @@ class HomeScreen extends StatelessWidget {
                     AppNavigator.of(context).push(MarketplaceScreen());
                   },),
                   _menuItem(Icons.apartment, "PORTFOLIO",() {
-
+                    AppNavigator.of(context).push(PortfolioScreen());
                   },),
                   _menuItem(Icons.card_giftcard, "OFFERS",() {
                     AppNavigator.of(context).push(SpecialOffersScreen());
                   },),
                   _menuItem(Icons.emoji_events, "LEADERBOARD",() {
-
+                    AppNavigator.of(context).push(TopPlayersPage());
                   },),
                 ],
               ),

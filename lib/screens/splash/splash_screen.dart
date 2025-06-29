@@ -1,11 +1,11 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:money_maker/controllers/app_images.dart';
 import 'package:money_maker/controllers/app_navigation.dart';
 import 'package:money_maker/controllers/app_size.dart';
 import 'package:money_maker/screens/login/login_screen.dart';
-import 'package:money_maker/wigets/background_widget.dart';
+import 'package:money_maker/widgets/background_widget.dart';
+
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

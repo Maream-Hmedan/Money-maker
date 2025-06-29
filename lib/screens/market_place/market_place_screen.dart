@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:money_maker/controllers/app_colors.dart';
 import 'package:money_maker/controllers/app_images.dart';
-import 'package:money_maker/wigets/background_widget.dart';
-import 'package:money_maker/wigets/common_views.dart';
+import 'package:money_maker/widgets/background_widget.dart';
+import 'package:money_maker/widgets/common_views.dart';
 import 'package:sizer/sizer.dart';
 
 class MarketplaceScreen extends StatefulWidget {
@@ -27,7 +27,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
         child: Column(
           children: [
             CommonViews().customText(
-              textContent: 'MARKETPLACE',
+              textContent: 'MARKET PLACE',
               fontSize: 20.sp,
               fontWeight: FontWeight.w700,
               textColor: AppColors.buttonColor,
@@ -62,7 +62,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                       ),
                       subtitle: Row(
                         children: [
-                          Icon(Icons.arrow_upward_outlined,color: Colors.green),
+                          Icon(Icons.arrow_upward, color: Colors.green, size: 18.sp),
                           SizedBox(width: 1.w,),
                           CommonViews().customText(
                             textContent:   '\$${item.price}',

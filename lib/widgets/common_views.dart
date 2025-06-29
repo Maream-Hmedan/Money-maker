@@ -100,6 +100,7 @@ class CommonViews {
   Widget customButton({
     required Widget child,
     required Color color,
+     Color? borderColor,
     required double border,
     double? width,
     required VoidCallback onTap,
@@ -116,7 +117,8 @@ class CommonViews {
           shadowColor: shadowColor,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(border), // Border radius
+            side: BorderSide(color: borderColor??Colors.transparent),
+            borderRadius: BorderRadius.circular(border,), // Border radius
           ),
         ),
         onPressed: onTap,

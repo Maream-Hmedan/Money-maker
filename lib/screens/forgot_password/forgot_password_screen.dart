@@ -7,9 +7,10 @@ import 'package:money_maker/controllers/app_navigation.dart';
 import 'package:money_maker/controllers/app_size.dart';
 import 'package:money_maker/controllers/styles.dart';
 import 'package:money_maker/screens/login/login_screen.dart';
-import 'package:money_maker/wigets/background_widget.dart';
-import 'package:money_maker/wigets/button_widget.dart';
-import 'package:money_maker/wigets/text_field_widget.dart';
+import 'package:money_maker/widgets/background_widget.dart';
+import 'package:money_maker/widgets/button_widget.dart';
+import 'package:money_maker/widgets/text_field_widget.dart';
+
 
 
 class ForgotPasswordScreen extends StatelessWidget {
