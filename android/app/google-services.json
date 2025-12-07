@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "915426134307",
+    "project_id": "money-maker-24c17",
+    "storage_bucket": "money-maker-24c17.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:915426134307:android:1fef627200077729f6e496",
+        "android_client_info": {
+          "package_name": "com.example.money_maker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDuSWjdZgXxuu7ywDlhCDAbQYeYqFqg-A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

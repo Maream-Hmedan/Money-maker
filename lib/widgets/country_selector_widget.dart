@@ -62,12 +62,12 @@ class _CountrySelectorFieldState extends State<CountrySelectorField> {
         enabledBorder: _border(widget.radius, widget.borderColor),
         focusedBorder: _border(widget.radius, widget.borderColor),
         errorBorder:
-            widget.errorBorder
-                ? _border(widget.radius, widget.errorBorderColor ?? Colors.red)
-                : OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(widget.radius ?? 8),
-                  borderSide: BorderSide.none,
-                ),
+        widget.errorBorder
+            ? _border(widget.radius, widget.errorBorderColor ?? Colors.red)
+            : OutlineInputBorder(
+          borderRadius: BorderRadius.circular(widget.radius ?? 8),
+          borderSide: BorderSide.none,
+        ),
         focusedErrorBorder: _border(widget.radius, widget.borderColor),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(widget.radius ?? 8),
@@ -83,8 +83,10 @@ class _CountrySelectorFieldState extends State<CountrySelectorField> {
             backgroundColor: Colors.white,
             textStyle: const TextStyle(fontSize: 16),
             bottomSheetHeight: 500,
-            inputDecoration: const InputDecoration(
+            inputDecoration:  InputDecoration(
               prefixIcon: Icon(Icons.search, color: Colors.grey),
+              hintText: 'Search Country',
+              hintStyle: TextStyle(fontSize: 15.sp,color: Colors.grey),
               border: OutlineInputBorder(),
             ),
           ),

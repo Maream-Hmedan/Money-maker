@@ -9,7 +9,6 @@ class Styles {
     fontFamily: 'Futura',
     color: Colors.black,
   );
-
   TextStyle smallText =  TextStyle(
     fontSize: 16.sp,
     fontWeight: FontWeight.w400,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:money_maker/controllers/app_colors.dart';
+import 'package:money_maker/generated/l10n.dart';
 import 'package:money_maker/screens/home/home_screen.dart';
 import 'package:money_maker/screens/portfolio/portfolio_screen.dart';
 import 'package:money_maker/screens/settings/settings_screen.dart';
@@ -66,10 +67,10 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
         // border: Border.all(color: AppColors.borderTextFieldColor, width: 2),
       ),
       items: [
-        _navItem(Icons.home, 'Home'),
-        _navItem(Icons.bar_chart, 'Portfolio'),
-        _navItem(Icons.emoji_events, 'Top'),
-        _navItem(Icons.settings, 'Settings'),
+        _navItem(Icons.home, S.of(context).home),
+        _navItem(Icons.bar_chart, S.of(context).portfolio),
+        _navItem(Icons.emoji_events, S.of(context).top),
+        _navItem(Icons.settings, S.of(context).settings),
       ],
       animationSettings: const NavBarAnimationSettings(
         navBarItemAnimation: ItemAnimationSettings(duration: Duration(milliseconds: 400), curve: Curves.ease),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:money_maker/controllers/app_colors.dart';
 import 'package:sizer/sizer.dart';
 
@@ -6,6 +7,7 @@ class TextFieldWidget extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final String? label;
+  final int? maxLength;
   final TextAlign? textAlign;
   final TextInputType keyboardType;
   final TextInputAction? inputAction;
@@ -56,6 +58,7 @@ class TextFieldWidget extends StatelessWidget {
     this.errorBorderColor,
     this.errorHeight,
     this.isObscure = false,
+    this.maxLength
   });
 
   @override
@@ -129,6 +132,16 @@ class TextFieldWidget extends StatelessWidget {
           borderSide: BorderSide.none,
         ),
       ),
+      inputFormatters: maxLength != null
+          ? [
+        LengthLimitingTextInputFormatter(maxLength),
+        if (keyboardType == TextInputType.phone)
+          FilteringTextInputFormatter.digitsOnly,
+      ]
+          : [
+        if (keyboardType == TextInputType.phone)
+          FilteringTextInputFormatter.digitsOnly,
+      ],
     );
   }
 

@@ -28,6 +28,20 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  shimmer:
+  awesome_dialog:
+  cached_network_image:
+  dropdown_search: 5.0.6
+  flutter_localizations:
+    sdk: flutter
+  get_storage: 2.1.1
+  flutter_spinkit: 5.2.1
+  shared_preferences: 2.5.3
+  scoped_model: 2.0.0
+  firebase_messaging: 15.2.7
+  firebase_core: 3.14.0
+  flutter_local_notifications: 16.3.2
+  http: 1.4.0
   intl:
   persistent_bottom_nav_bar:
   country_picker:
@@ -110,3 +124,5 @@ fonts:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+flutter_intl:
+  enabled: true

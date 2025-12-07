@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+import 'package:get/get.dart';
 import 'package:money_maker/controllers/app_colors.dart';
 import 'package:money_maker/controllers/app_images.dart';
 import 'package:money_maker/controllers/app_navigation.dart';
 import 'package:money_maker/controllers/app_size.dart';
 import 'package:money_maker/controllers/styles.dart';
-import 'package:money_maker/screens/login/login_screen.dart';
+import 'package:money_maker/generated/l10n.dart';
+import 'package:money_maker/screens/forgot_password/controller/forgot_pass_controller.dart';
+import 'package:money_maker/screens/login/view/login_screen.dart';
 import 'package:money_maker/widgets/background_widget.dart';
 import 'package:money_maker/widgets/button_widget.dart';
 import 'package:money_maker/widgets/text_field_widget.dart';
@@ -18,6 +19,8 @@ class ForgotPasswordScreen extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final FocusNode _emailFocusNode = FocusNode();
   final errorEmailMessage = RxString('');
+
+  final ForgotPasswordController _forgetPass = Get.put(ForgotPasswordController());
 
 
   final GlobalKey<FormState> _key = GlobalKey();
@@ -41,35 +44,35 @@ class ForgotPasswordScreen extends StatelessWidget {
                   height: AppSize.logoHeightSignUpLogIn,
                   fit: BoxFit.cover,
                 ),
-                Text('Forgot Password', style: Styles().bigText),
+                Text(S.of(context).forgotPassword, style: Styles().bigText),
                 SizedBox(height: AppSize.heightBetweenTextField),
-                Text("Enter your email to reset your password.", style: Styles().midText),
+                Text(S.of(context).enterYourEmailToResetYourPassword, style: Styles().midText),
                 SizedBox(height: AppSize.heightBetweenTextField),
                 TextFieldWidget(
                   controller: _emailController,
                   focusNode: _emailFocusNode,
                   keyboardType: TextInputType.emailAddress,
-                  hint: 'Email',
+                  hint: S.of(context).email,
                   onSubmitted: (v) => FocusManager.instance.primaryFocus?.unfocus(),
                   validator: (v) {
                     if (v == null || v.isEmpty) {
                       errorEmailMessage.value =
-                      "Please verify the email address.";
+                      S.of(context).pleaseVerifyTheEmailAddress;
                       return "";
                     }
                     if (v.length < 5) {
                       errorEmailMessage.value =
-                      "Please verify the email address.";
+                      S.of(context).pleaseVerifyTheEmailAddress;
                       return "";
                     }
                     if (v.contains(" ")) {
                       errorEmailMessage.value =
-                      "Please verify the email address.";
+                      S.of(context).pleaseVerifyTheEmailAddress;
                       return "";
                     }
                     if (!isValidEmail(v)) {
                       errorEmailMessage.value =
-                      "Please verify the email address.";
+                      S.of(context).pleaseVerifyTheEmailAddress;
                       return "";
                     }
                     return null;
@@ -87,18 +90,19 @@ class ForgotPasswordScreen extends StatelessWidget {
                   onTap: () {
                     errorEmailMessage.value='';
                     if (_key.currentState!.validate()) {
-                      AppNavigator.of(context).push(LoginScreen());
+                      _forgetPass.forgotPassword(email: _emailController.text.trim());
                     }
                   },
-                  child: Text('Send', style: Styles().buttonText),
+                  child: Text(S.of(context).send, style: Styles().buttonText),
                 ),
                 SizedBox(height: AppSize.heightBetweenTextAndButton),
-                Text("Go Back To ", style: Styles().midText),
+                Text(S.of(context).goBackTo, style: Styles().midText),
                 GestureDetector(
                     onTap: (){
+                      _forgetPass.forgotPassword(email: _emailController.text.trim());
                       AppNavigator.of(context).push(LoginScreen());
                     },
-                    child: Text("Sign In", style: Styles().mainText)),
+                    child: Text(S.of(context).signIn, style: Styles().mainText)),
               ],
             ),
           ),

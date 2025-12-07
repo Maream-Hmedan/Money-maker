@@ -1,18 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:money_maker/controllers/app_colors.dart';
 import 'package:money_maker/controllers/app_images.dart';
 import 'package:money_maker/controllers/app_navigation.dart';
 import 'package:money_maker/controllers/app_size.dart';
-import 'package:money_maker/screens/market_place/market_place_screen.dart';
+import 'package:money_maker/generated/l10n.dart';
+import 'package:money_maker/screens/home/widget/portfolio_value/portfolio_value_controller.dart';
+import 'package:money_maker/screens/market_place/view/market_place_screen.dart';
 import 'package:money_maker/screens/portfolio/portfolio_screen.dart';
 import 'package:money_maker/screens/special_offers/special_offers_screen.dart';
 import 'package:money_maker/screens/top/top_screen.dart';
 import 'package:money_maker/widgets/background_widget.dart';
 import 'package:money_maker/widgets/common_views.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:sizer/sizer.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final PortfolioValueController _portfolioValue = Get.put(PortfolioValueController());
 
   @override
   Widget build(BuildContext context) {
@@ -50,27 +61,71 @@ class HomeScreen extends StatelessWidget {
               width: 90.w,
             ),
             SizedBox(height: 1.h),
-            CommonViews().customContainer(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  CommonViews().customText(
-                    textContent: 'Portfolio',
-                    fontWeight: FontWeight.w500,
-                    fontSize: 19.sp,
-                  ),
-                  CommonViews().customText(
-                    textContent: '\$28,700',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 20.sp,
-                  ),
-                ],
-              ),
-              colorBorder: AppColors.borderTextFieldColor,
-              color: AppColors.whiteColor,
-              padding: EdgeInsets.all(8),
-              height: 8.h,
-              width: 90.w,
+            GetBuilder<PortfolioValueController>(
+              builder: (_) {
+                if (_portfolioValue.isLoading) {
+                  return CommonViews().customContainer(
+                    child: Shimmer.fromColors(
+                      baseColor: Colors.grey[300] ?? Colors.grey,
+                      highlightColor: Colors.grey[100] ?? Colors.white,
+                      child: Container(
+                        width: 90.w,
+                        height: 8.h,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        margin: EdgeInsets.all(1.w),
+                      ),
+                    ),
+                    colorBorder: AppColors.borderTextFieldColor,
+                    color: AppColors.whiteColor,
+                    height: 8.h,
+                    width: 90.w,
+                  );
+                }
+                else if (_portfolioValue.isError) {
+                  return CommonViews().customContainer(
+                    child: Center(
+                      child: CommonViews().customText(
+                        textContent: S.of(context).errorLoadingPortfolioValue,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w500,
+                        textColor: Colors.red,
+                      ),
+                    ),
+                    colorBorder: AppColors.borderTextFieldColor,
+                    color: AppColors.whiteColor,
+                    padding: EdgeInsets.all(8),
+                    height: 8.h,
+                    width: 90.w,
+                  );
+                } else {
+                  // isSuccess
+                  return CommonViews().customContainer(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        CommonViews().customText(
+                          textContent: S.of(context).portfolio,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 19.sp,
+                        ),
+                        CommonViews().customText(
+                          textContent: '\$${_portfolioValue.portfolioValue.toStringAsFixed(2)}',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 20.sp,
+                        ),
+                      ],
+                    ),
+                    colorBorder: AppColors.borderTextFieldColor,
+                    color: AppColors.whiteColor,
+                    padding: EdgeInsets.all(8),
+                    height: 8.h,
+                    width: 90.w,
+                  );
+                }
+              },
             ),
             SizedBox(height: 1.5.h),
             Expanded(

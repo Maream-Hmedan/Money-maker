@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+import 'package:get/get.dart';
 import 'package:money_maker/controllers/app_colors.dart';
 import 'package:money_maker/controllers/app_images.dart';
 import 'package:money_maker/controllers/app_navigation.dart';
 import 'package:money_maker/controllers/app_size.dart';
 import 'package:money_maker/controllers/styles.dart';
 import 'package:money_maker/screens/bottom_nav_bar/bottom_nav_bar_screen.dart';
-import 'package:money_maker/screens/forgot_password/forgot_password_screen.dart';
-import 'package:money_maker/screens/register/register_screen.dart';
+import 'package:money_maker/screens/forgot_password/view/forgot_password_screen.dart';
+import 'package:money_maker/screens/login/controller/login_controller.dart';
+import 'package:money_maker/screens/register/view/register_screen.dart';
 import 'package:money_maker/widgets/background_widget.dart';
 import 'package:money_maker/widgets/button_widget.dart';
 import 'package:money_maker/widgets/text_field_widget.dart';
@@ -24,6 +24,7 @@ class LoginScreen extends StatelessWidget {
   final FocusNode _passFocusNode = FocusNode();
   final errorPassMessage = RxString('');
   final GlobalKey<FormState> _key = GlobalKey();
+  final LoginController _loginController = Get.put(LoginController());
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +127,7 @@ class LoginScreen extends StatelessWidget {
                     errorPassMessage.value = '';
                     errorFirstFieldMessage.value = '';
                     if (_key.currentState!.validate()) {
-                      AppNavigator.of(context).push(BottomNavBarScreen());
+                      _loginController.login(email: _firstFieldController.text.trim(), password: _passController.text.trim());
                     }
                   },
                   child: Text('Log In', style: Styles().buttonText),
