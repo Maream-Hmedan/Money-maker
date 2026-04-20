@@ -6,8 +6,8 @@ import 'package:money_maker/widgets/common_views.dart';
 import 'package:sizer/sizer.dart';
 
 class TopPlayersPage extends StatefulWidget {
-
-   const TopPlayersPage({super.key});
+  final bool  showAppBar;
+   const TopPlayersPage({super.key,required this.showAppBar});
 
   @override
   State<TopPlayersPage> createState() => _TopPlayersPageState();
@@ -27,6 +27,7 @@ class _TopPlayersPageState extends State<TopPlayersPage> {
   @override
   Widget build(BuildContext context) {
     return CommonBackground(
+      showAppBar: widget.showAppBar,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
