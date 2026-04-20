@@ -5,7 +5,7 @@ class AppColors {
   static const Color darkBrandColor = Color(0xFF380E87);
   static const Color borderTextFieldColor = Color(0xFF850E95);
   static const Color buttonColor = Color(0xFFE59200);
-
+  static const Color highlightColor = Color(0xFFFF7AA8);
 
 }
 

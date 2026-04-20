@@ -2,25 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:money_maker/controllers/app_colors.dart';
 import 'package:money_maker/controllers/app_navigation.dart';
+import 'package:money_maker/generated/l10n.dart';
+import 'package:money_maker/screens/market_place/controller/market_place_controller.dart';
+import 'package:money_maker/screens/market_place/model/market_place_response.dart';
 import 'package:money_maker/widgets/app_cached_image.dart';
 import 'package:money_maker/widgets/background_widget.dart';
 import 'package:money_maker/widgets/common_views.dart';
 import 'package:sizer/sizer.dart';
 
 class PurchaseRequestConfirmationScreen extends StatelessWidget {
-  final dynamic item;
+  final MarketItem item;
+  final int quantity;
 
-  const PurchaseRequestConfirmationScreen({
+  PurchaseRequestConfirmationScreen({
     super.key,
     required this.item,
+    required this.quantity,
   });
+
+  final MarketPlaceController controller = Get.find<MarketPlaceController>();
 
   @override
   Widget build(BuildContext context) {
-    final String assetName = item.name ?? 'Red Sea Hotel';
-    final String sellerName = item.ownerName ?? 'Seller';
-    final String price = item.price?.toString() ?? '0';
-    final String? imageUrl = item.image;
+    final String assetName =
+        item.assetName.isNotEmpty ? item.assetName : 'Asset';
+    final double totalPrice = item.price * quantity;
+    final String imageUrl = item.image;
 
     return CommonBackground(
       showAppBar: true,
@@ -28,14 +35,12 @@ class PurchaseRequestConfirmationScreen extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 0.5.h),
         child: Column(
           children: [
-            /// TITLE
             CommonViews().customText(
-              textContent: 'Confirm Purchase',
+              textContent: S.of(context).confirmPurchase,
               fontSize: 20.sp,
               fontWeight: FontWeight.w700,
               textColor: AppColors.buttonColor,
             ),
-
             SizedBox(height: 2.h),
 
             Container(
@@ -63,14 +68,20 @@ class PurchaseRequestConfirmationScreen extends StatelessWidget {
                     fit: BoxFit.cover,
                     borderRadius: BorderRadius.circular(18),
                   ),
-
                   SizedBox(height: 2.h),
 
-                  _infoRow('Asset Name', assetName),
+                  _infoRow(S.of(context).assetName, assetName),
                   SizedBox(height: 1.2.h),
-                  _infoRow('Price', price),
+                  _infoRow(
+                    S.of(context).pricePerCopy,
+                    '\$${item.price.toStringAsFixed(2)}',
+                  ),
                   SizedBox(height: 1.2.h),
-                  _infoRow('Seller', sellerName),
+                  _infoRow(S.of(context).quantity, quantity.toString()),
+                  SizedBox(height: 1.2.h),
+                  _infoRow(S.of(context).totalPriceCon, '\$${totalPrice.toStringAsFixed(2)}'),
+                  SizedBox(height: 1.2.h),
+                  _infoRow(S.of(context).type, item.type),
                 ],
               ),
             ),
@@ -85,10 +96,11 @@ class PurchaseRequestConfirmationScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: CommonViews().customText(
-                textContent:
-                'Are you sure you want to buy this asset for $price?\n\n'
-                    'After confirmation, the seller will be notified that there is a purchase request awaiting approval. '
-                    'Payment is made outside the app, and no amount will be deducted from your balance directly.',
+                textContent: S.of(context).confirmPurchaseMessage(
+                  quantity,
+                  assetName,
+                  totalPrice.toStringAsFixed(2),
+                ),
                 textColor: AppColors.darkBrandColor,
                 fontWeight: FontWeight.w400,
                 textAlign: TextAlign.start,
@@ -109,10 +121,10 @@ class PurchaseRequestConfirmationScreen extends StatelessWidget {
                     border: 50,
                     elevation: 0,
                     child: CommonViews().customText(
-                      textContent: 'Cancel',
+                      textContent: S.of(context).cancel,
                       textColor: AppColors.darkBrandColor,
                       fontWeight: FontWeight.w600,
-                      fontSize: 14.sp,
+                      fontSize: 16.sp,
                     ),
                   ),
                 ),
@@ -120,20 +132,11 @@ class PurchaseRequestConfirmationScreen extends StatelessWidget {
                 Expanded(
                   child: CommonViews().customButton(
                     onTap: () {
-                      // TODO:
-                      // 1) send notification to seller
-                      // 2) freeze/hide asset temporarily from marketplace
-                      // 3) create purchase request with pending status
                       AppNavigator.of(context).pop();
-
-                      Get.snackbar(
-                        'Request Sent',
-                        'The seller has been notified of your purchase request.',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.black87,
-                        colorText: Colors.white,
-                        margin: EdgeInsets.all(3.w),
-                        borderRadius: 12,
+                      controller.buyAssets(
+                        assetId: '',
+                        copyCount: quantity.toString(),
+                        saleOfferId: item.id.toString(),
                       );
                     },
                     color: AppColors.buttonColor,
@@ -141,7 +144,7 @@ class PurchaseRequestConfirmationScreen extends StatelessWidget {
                     elevation: 4,
                     shadowColor: Colors.black,
                     child: CommonViews().customText(
-                      textContent: 'Confirm',
+                      textContent: S.of(context).confirm,
                       textColor: AppColors.darkBrandColor,
                       fontWeight: FontWeight.w600,
                       fontSize: 16.sp,
@@ -162,7 +165,7 @@ class PurchaseRequestConfirmationScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 24.w,
+          width: 28.w,
           child: CommonViews().customText(
             textContent: '$title:',
             textColor: Colors.grey.shade700,

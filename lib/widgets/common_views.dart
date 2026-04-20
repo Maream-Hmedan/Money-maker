@@ -18,11 +18,13 @@ class CommonViews {
     TextOverflow? overflow,
     TextAlign? textAlign,
     FontWeight? fontWeight,
+    TextDecoration? textDecoration,
   }) {
     TextStyle baseStyle = TextStyle(
       fontSize: fontSize??18.sp,
       color: textColor ?? Colors.black,
       fontWeight: fontWeight,
+      decoration: textDecoration,
     );
 
     return Text(

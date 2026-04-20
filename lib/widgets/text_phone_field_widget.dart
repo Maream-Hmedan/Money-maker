@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:money_maker/controllers/app_colors.dart';
 import 'package:money_maker/l10n/app_locale.dart';
 import 'package:sizer/sizer.dart';
 
-
-class TextFieldWidget extends StatelessWidget {
+class TextPhoneFieldWidget extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final String? label;
@@ -33,7 +31,7 @@ class TextFieldWidget extends StatelessWidget {
   final double? errorHeight;
   final bool isObscure;
 
-  const TextFieldWidget({
+  const TextPhoneFieldWidget({
     super.key,
     required this.controller,
     required this.focusNode,
@@ -65,96 +63,104 @@ class TextFieldWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      focusNode: focusNode,
-      keyboardType: keyboardType,
-      maxLines: maxLines ?? 1,
-      textAlign:
-          textAlign ??
-          (AppLocale().isArabic() ? TextAlign.right : TextAlign.left),
-      textInputAction: inputAction ?? TextInputAction.next,
-      readOnly: readOnly ?? false,
-      obscureText: isObscure,
-      validator: validator,
-      onFieldSubmitted: onSubmitted,
-      enableInteractiveSelection: false,
-      autovalidateMode: AutovalidateMode.disabled,
-      cursorColor: Colors.black,
-      style: TextStyle(
-        fontSize: 15.sp,
-        fontWeight: FontWeight.w400,
-        fontFamily: 'Futura',
-        color: textColor ?? Colors.black,
-      ),
-      decoration: InputDecoration(
-        // paddings
-        contentPadding: EdgeInsets.symmetric(vertical: 2.5.h, horizontal: 3.w),
-        // labels & hints
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-        alignLabelWithHint: true,
-        label: Text(label ?? ''),
-        labelStyle: TextStyle(
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: TextFormField(
+        controller: controller,
+        focusNode: focusNode,
+        keyboardType: keyboardType,
+        maxLines: maxLines ?? 1,
+        textAlign: TextAlign.left,
+        textInputAction: inputAction ?? TextInputAction.next,
+        readOnly: readOnly ?? false,
+        obscureText: isObscure,
+        validator: validator,
+        onFieldSubmitted: onSubmitted,
+        enableInteractiveSelection: false,
+        autovalidateMode: AutovalidateMode.disabled,
+        cursorColor: Colors.black,
+        style: TextStyle(
           fontSize: 15.sp,
           fontWeight: FontWeight.w400,
           fontFamily: 'Futura',
-          color: textColor ?? AppColors.whiteColor,
+          color: textColor ?? Colors.black,
         ),
-        hintText: hint,
-        hintStyle: TextStyle(
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w400,
-          fontFamily: 'Futura',
-          color: hintColor ?? Colors.grey,
-        ),
-        errorText: errorText,
-        errorStyle: TextStyle(height: errorHeight ?? 0.01),
-        prefixIcon: prefixIcon,
-        prefixIconColor: Color(0xFFE59200),
-        suffixIcon: suffixIcon,
-        prefix:
-            (prefixText != null && prefixText!.trim().isNotEmpty)
-                ? Align(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: 1.0,
-                  child: Text(prefixText!, textAlign: TextAlign.left),
-                )
-                : null,
+        decoration: InputDecoration(
+          // paddings
+          contentPadding: EdgeInsets.symmetric(vertical: 2.5.h, horizontal: 3.w),
+          // labels & hints
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          alignLabelWithHint: true,
+          label: Text(label ?? ''),
+          labelStyle: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w400,
+            fontFamily: 'Futura',
+            color: textColor ?? Colors.grey,
+          ),
+          hint: Align(
+            alignment: AppLocale().isArabic()
+                ? Alignment.centerRight
+                : Alignment.centerLeft,
+            child: Text(
+              hint ?? "",
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w400,
+                fontFamily: 'Futura',
+                color: hintColor ?? Colors.grey,
+              ),
+            ),
+          ),
+          errorText: errorText,
+          errorStyle: TextStyle(height: errorHeight ?? 0.01),
+          prefixIcon: prefixIcon,
+          prefixIconColor: Color(0xFFE59200),
+          suffixIcon: suffixIcon,
+          prefix:
+              (prefixText != null && prefixText!.trim().isNotEmpty)
+                  ? Align(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: 1.0,
+                    child: Text(prefixText!, textAlign: TextAlign.left),
+                  )
+                  : null,
 
-        prefixStyle: TextStyle(
-          fontSize: 17.sp,
-          fontWeight: FontWeight.w400,
-          fontFamily: 'Futura',
-          color: Colors.black,
+          prefixStyle: TextStyle(
+            fontSize: 17.sp,
+            fontWeight: FontWeight.w400,
+            fontFamily: 'Futura',
+            color: Colors.black,
+          ),
+          filled: true,
+          fillColor: fillColor ?? Colors.transparent,
+          enabledBorder: _border(radius, borderColor),
+          focusedBorder: _border(radius, borderColor),
+          errorBorder:
+              errorBorder
+                  ? _border(radius, errorBorderColor ?? Colors.red)
+                  : OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(radius ?? 8),
+                    borderSide: BorderSide.none,
+                  ),
+          focusedErrorBorder: _border(radius, borderColor),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(radius ?? 8),
+            borderSide: BorderSide.none,
+          ),
         ),
-        filled: true,
-        fillColor: fillColor ?? Colors.transparent,
-        enabledBorder: _border(radius, borderColor),
-        focusedBorder: _border(radius, borderColor),
-        errorBorder:
-            errorBorder
-                ? _border(radius, errorBorderColor ?? Colors.red)
-                : OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(radius ?? 8),
-                  borderSide: BorderSide.none,
-                ),
-        focusedErrorBorder: _border(radius, borderColor),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(radius ?? 8),
-          borderSide: BorderSide.none,
-        ),
+        inputFormatters:
+            maxLength != null
+                ? [
+                  LengthLimitingTextInputFormatter(maxLength),
+                  if (keyboardType == TextInputType.phone)
+                    FilteringTextInputFormatter.digitsOnly,
+                ]
+                : [
+                  if (keyboardType == TextInputType.phone)
+                    FilteringTextInputFormatter.digitsOnly,
+                ],
       ),
-      inputFormatters:
-          maxLength != null
-              ? [
-                LengthLimitingTextInputFormatter(maxLength),
-                if (keyboardType == TextInputType.phone)
-                  FilteringTextInputFormatter.digitsOnly,
-              ]
-              : [
-                if (keyboardType == TextInputType.phone)
-                  FilteringTextInputFormatter.digitsOnly,
-              ],
     );
   }
 

@@ -80,7 +80,7 @@ class ConfirmReceiptScreen extends StatelessWidget {
               ),
               child: CommonViews().customText(
                 textContent:
-                'Please confirm that you have received the payment from the buyer. '
+                    'Please confirm that you have received the payment from the buyer. '
                     'Once confirmed, ownership of the asset will be transferred to the buyer immediately within the app.',
                 textColor: AppColors.darkBrandColor,
                 fontWeight: FontWeight.w400,
@@ -94,7 +94,7 @@ class ConfirmReceiptScreen extends StatelessWidget {
             /// BUTTON
             CommonViews().customButton(
               onTap: () {
-                // TODO:
+                // todo:
                 // 1) transfer asset ownership to buyer
                 // 2) remove asset from marketplace if still visible
                 // 3) notify buyer that they are the new owner

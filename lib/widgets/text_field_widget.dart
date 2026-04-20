@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:money_maker/controllers/app_colors.dart';
+import 'package:money_maker/l10n/app_locale.dart';
 import 'package:sizer/sizer.dart';
 
 class TextFieldWidget extends StatelessWidget {
@@ -13,6 +13,7 @@ class TextFieldWidget extends StatelessWidget {
   final TextInputAction? inputAction;
   final double? radius;
   final ValueChanged<String>? onSubmitted;
+  final ValueChanged<String>? onChanged;
   final String? prefixText;
   final String? hint;
   final bool errorBorder;
@@ -58,7 +59,8 @@ class TextFieldWidget extends StatelessWidget {
     this.errorBorderColor,
     this.errorHeight,
     this.isObscure = false,
-    this.maxLength
+    this.maxLength,
+    this.onChanged,
   });
 
   @override
@@ -68,48 +70,58 @@ class TextFieldWidget extends StatelessWidget {
       focusNode: focusNode,
       keyboardType: keyboardType,
       maxLines: maxLines ?? 1,
-      textAlign: textAlign ?? TextAlign.left,
+      textAlign:
+          textAlign ??
+          (AppLocale().isArabic() ? TextAlign.right : TextAlign.left),
       textInputAction: inputAction ?? TextInputAction.next,
       readOnly: readOnly ?? false,
       obscureText: isObscure,
       validator: validator,
       onFieldSubmitted: onSubmitted,
+      onChanged: onChanged,
+      enableInteractiveSelection: true,
       autovalidateMode: AutovalidateMode.disabled,
+      cursorColor: Colors.black,
       style: TextStyle(
         fontSize: 15.sp,
         fontWeight: FontWeight.w400,
         fontFamily: 'Futura',
-        color: textColor??Colors.black,
+        color: textColor ?? Colors.black,
       ),
       decoration: InputDecoration(
         // paddings
-        contentPadding: EdgeInsets.symmetric(
-          vertical: 2.5.h,
-          horizontal: 3.w,
-        ),
+        contentPadding: EdgeInsets.symmetric(vertical: 2.5.h, horizontal: 3.w),
         // labels & hints
         floatingLabelBehavior: FloatingLabelBehavior.always,
         alignLabelWithHint: true,
         label: Text(label ?? ''),
-        labelStyle:  TextStyle(
-          fontSize: 15.sp,
+        labelStyle: TextStyle(
+          fontSize: 17.sp,
           fontWeight: FontWeight.w400,
           fontFamily: 'Futura',
-          color: textColor??AppColors.whiteColor,
+          color: textColor ?? Colors.grey,
         ),
         hintText: hint,
         hintStyle: TextStyle(
           fontSize: 16.sp,
           fontWeight: FontWeight.w400,
           fontFamily: 'Futura',
-          color: hintColor??Colors.grey,
+          color: hintColor ?? Colors.grey,
         ),
         errorText: errorText,
         errorStyle: TextStyle(height: errorHeight ?? 0.01),
         prefixIcon: prefixIcon,
         prefixIconColor: Color(0xFFE59200),
         suffixIcon: suffixIcon,
-        prefix: Text(prefixText ?? ''),
+        prefix:
+            (prefixText != null && prefixText!.trim().isNotEmpty)
+                ? Align(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: 1.0,
+                  child: Text(prefixText!, textAlign: TextAlign.left),
+                )
+                : null,
+
         prefixStyle: TextStyle(
           fontSize: 17.sp,
           fontWeight: FontWeight.w400,
@@ -120,33 +132,39 @@ class TextFieldWidget extends StatelessWidget {
         fillColor: fillColor ?? Colors.transparent,
         enabledBorder: _border(radius, borderColor),
         focusedBorder: _border(radius, borderColor),
-        errorBorder: errorBorder
-            ? _border(radius, errorBorderColor ?? Colors.red)
-            : OutlineInputBorder(
-          borderRadius: BorderRadius.circular(radius ?? 8),
-          borderSide: BorderSide.none,
-        ),
+        errorBorder:
+            errorBorder
+                ? _border(radius, errorBorderColor ?? Colors.red)
+                : OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(radius ?? 8),
+                  borderSide: BorderSide.none,
+                ),
         focusedErrorBorder: _border(radius, borderColor),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radius ?? 8),
           borderSide: BorderSide.none,
         ),
       ),
-      inputFormatters: maxLength != null
-          ? [
-        LengthLimitingTextInputFormatter(maxLength),
-        if (keyboardType == TextInputType.phone)
-          FilteringTextInputFormatter.digitsOnly,
-      ]
-          : [
-        if (keyboardType == TextInputType.phone)
-          FilteringTextInputFormatter.digitsOnly,
-      ],
+      inputFormatters:
+          maxLength != null
+              ? [
+                LengthLimitingTextInputFormatter(maxLength),
+                if (keyboardType == TextInputType.phone)
+                  FilteringTextInputFormatter.digitsOnly,
+              ]
+              : [
+                if (keyboardType == TextInputType.phone)
+                  FilteringTextInputFormatter.digitsOnly,
+              ],
     );
   }
 
-  OutlineInputBorder _border(double? radius, Color? color) => OutlineInputBorder(
-    borderRadius: BorderRadius.circular(radius ?? 8),
-    borderSide: BorderSide(color: color ?? Colors.grey.shade200,width: 1.5),
-  );
+  OutlineInputBorder _border(double? radius, Color? color) =>
+      OutlineInputBorder(
+        borderRadius: BorderRadius.circular(radius ?? 8),
+        borderSide: BorderSide(
+          color: color ?? Colors.grey.shade200,
+          width: 1.5,
+        ),
+      );
 }

@@ -28,6 +28,8 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  url_launcher:
+  image_picker:
   shimmer:
   awesome_dialog:
   cached_network_image:
@@ -116,6 +118,10 @@ fonts:
       - asset: assets/fonts/Futura Bold Italic font.ttf
         weight: 700
         style: italic
+  - family: Cairo
+    fonts:
+    - asset: assets/fonts/Cairo-Regular.ttf
+    weight: 400
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf

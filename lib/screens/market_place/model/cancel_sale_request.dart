@@ -1,8 +1,8 @@
-class CancelPortfolioRequest {
+class CancelSaleRequest {
   final String saleOfferId;
 
 
-  CancelPortfolioRequest({
+  CancelSaleRequest({
     required this.saleOfferId,
   });
 
@@ -12,8 +12,8 @@ class CancelPortfolioRequest {
     };
   }
 
-  factory CancelPortfolioRequest.fromJson(Map<String, dynamic> json) {
-    return CancelPortfolioRequest(
+  factory CancelSaleRequest.fromJson(Map<String, dynamic> json) {
+    return CancelSaleRequest(
       saleOfferId: json['sale_offer_id']?.toString() ?? '',
     );
   }

@@ -1,28 +1,21 @@
 import 'dart:convert';
 
-class BuyOfferRequest {
-  final String copyCount;
-  final String offerId;
+class BuyOfferResponse {
+  final String message;
 
-
-  BuyOfferRequest({
-    required this.copyCount,
-    required this.offerId,
+  BuyOfferResponse({
+    required this.message,
   });
 
-  factory BuyOfferRequest.fromRawJson(String str) =>
-      BuyOfferRequest.fromJson(json.decode(str));
+  factory BuyOfferResponse.fromRawJson(String str) => BuyOfferResponse.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
-  factory BuyOfferRequest.fromJson(Map<String, dynamic> json) =>
-      BuyOfferRequest(
-        copyCount: json["copy_count"] ?? "",
-        offerId: json["offer_id"] ?? "",
-      );
+  factory BuyOfferResponse.fromJson(Map<String, dynamic> json) => BuyOfferResponse(
+    message: json["message"],
+  );
 
   Map<String, dynamic> toJson() => {
-    "copy_count": copyCount,
-    "offer_id": offerId,
+    "message": message,
   };
 }

@@ -4,16 +4,18 @@ import 'package:money_maker/widgets/helpers/general.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'dart:ui';
 
-
-
 class AppLocale extends Model {
   AppLocale._private();
   static final AppLocale _shared = AppLocale._private();
   factory AppLocale() => _shared;
 
   Locale _currentLocale = const Locale('en');
-
   Locale get currentLocale => _currentLocale;
+
+  final List<VoidCallback> _onLocaleChanged = [];
+
+  void addLocaleListener(VoidCallback cb) => _onLocaleChanged.add(cb);
+  void removeLocaleListener(VoidCallback cb) => _onLocaleChanged.remove(cb);
 
   Future<void> init() async {
     final saved = await General.getPrefString(
@@ -26,13 +28,20 @@ class AppLocale extends Model {
 
   Future<void> setLocale(Locale locale) async {
     if (_currentLocale == locale) return;
+
     _currentLocale = locale;
     await General.savePrefString(
       ConstantValues.SELECTED_LANGUAGE,
       locale.languageCode,
     );
+
     notifyListeners();
+
+    for (final cb in List<VoidCallback>.from(_onLocaleChanged)) {
+      cb();
+    }
   }
 
   bool isArabic() => _currentLocale.languageCode == 'ar';
 }
+

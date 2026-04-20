@@ -2,7 +2,7 @@ import 'package:sizer/sizer.dart';
 
 class AppSize{
   //Common Logo
-  static double get logoHeightCommon => 22.h;
+  static double get logoHeightCommon => 17.h;
   static double get logoWidthCommon => 55.w;
 
 //Splash Screen
@@ -17,5 +17,9 @@ class AppSize{
 
   //Button
   static double get radiusButtonSignInSignUp => 20;
+
+  //Company
+  static double get logoHeightCompany => 20.h;
+  static double get logoWidthCompany => 50.w;
 
 }

@@ -6,5 +6,6 @@ class ConstantValues{
   static String COUNTRY_CODE= 'selected_country_code';
   static String COUNTRY_FLAG= 'selected_country_flag';
   static String COUNTRY_NAME= 'selected_country_name';
-
+  static String USER_EMAIL= 'user_email';
+  static String USER_PASSWORD= 'user_password';
 }

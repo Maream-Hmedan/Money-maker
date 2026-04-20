@@ -11,14 +11,17 @@ class SortResponse {
     required this.sortResult,
   });
 
-  factory SortResponse.fromRawJson(String str) => SortResponse.fromJson(json.decode(str));
+  factory SortResponse.fromRawJson(String str) =>
+      SortResponse.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
   factory SortResponse.fromJson(Map<String, dynamic> json) => SortResponse(
-    errors: List<dynamic>.from(json["errors"].map((x) => x)),
-    message: json["message"],
-    sortResult: List<SortResult>.from(json["result"].map((x) => SortResult.fromJson(x))),
+    errors: List<dynamic>.from((json["errors"] ?? []).map((x) => x)),
+    message: json["message"] ?? '',
+    sortResult: List<SortResult>.from(
+      (json["result"] ?? []).map((x) => SortResult.fromJson(x)),
+    ),
   );
 
   Map<String, dynamic> toJson() => {
@@ -57,8 +60,9 @@ class SortResult {
     name: json["name"] ?? '',
     type: json["type"] ?? '',
     image: json["image"] ?? '',
-    price: (json["price"] ?? 0).toDouble(),
-    priceGrowthRate: (json["price_growth_rate"] ?? 0).toDouble(),
+    price: (json["price"] as num?)?.toDouble() ?? 0.0,
+    priceGrowthRate:
+    (json["price_growth_rate"] as num?)?.toDouble() ?? 0.0,
     copyCount: json["copy_count"] ?? 0,
   );
 

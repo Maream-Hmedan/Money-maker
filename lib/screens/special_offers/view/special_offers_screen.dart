@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:money_maker/controllers/app_colors.dart';
-import 'package:money_maker/controllers/app_images.dart';
+import 'package:money_maker/generated/l10n.dart';
+import 'package:money_maker/l10n/app_locale.dart';
+import 'package:money_maker/screens/special_offers/controller/special_offers_controller.dart';
+import 'package:money_maker/screens/special_offers/model/special_offers_response.dart';
+import 'package:money_maker/widgets/app_cached_image.dart';
 import 'package:money_maker/widgets/background_widget.dart';
 import 'package:money_maker/widgets/common_views.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:sizer/sizer.dart';
-
 class SpecialOffersScreen extends StatefulWidget {
   const SpecialOffersScreen({super.key});
 
@@ -14,103 +18,202 @@ class SpecialOffersScreen extends StatefulWidget {
 }
 
 class _SpecialOffersScreenState extends State<SpecialOffersScreen> {
-  final List<OfferItem> offers = [
-    OfferItem(
-      title: '10% OFF on Towers',
-      description: 'Get 10% discount on selected tower assets for a limited time.',
-      conditions: 'Valid on selected towers only. Cannot be combined with other offers.',
-      includedAssets: ['SKYSCRAPER', 'LUXURY TOWER', 'CITY VIEW TOWER'],
-      expiryDate: DateTime(2026, 3, 30),
-      promoCode: null,
-      isAutomatic: true,
-      imagePath: building,
-      discountLabel: '-10%',
-    ),
-    OfferItem(
-      title: '15% OFF on Yachts',
-      description: 'Exclusive offer on premium yachts.',
-      conditions: 'Enter promo code during checkout to activate the discount.',
-      includedAssets: ['YACHT', 'ROYAL YACHT'],
-      expiryDate: DateTime(2026, 4, 5),
-      promoCode: 'YACHT15',
-      isAutomatic: false,
-      imagePath: yacht,
-      discountLabel: '-15%',
-    ),
-    OfferItem(
-      title: '20% OFF on Hotels',
-      description: 'Save more on selected hotel investments.',
-      conditions: 'Offer valid until stock lasts.',
-      includedAssets: ['HOTEL', 'BEACH HOTEL', 'CITY HOTEL'],
-      expiryDate: DateTime(2026, 4, 10),
-      promoCode: 'HOTEL20',
-      isAutomatic: false,
-      imagePath: hotel,
-      discountLabel: '-20%',
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+
+    if (!Get.isRegistered<SpecialOffersController>()) {
+      Get.put(SpecialOffersController());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return CommonBackground(
       showAppBar: true,
-      child: Column(
-        children: [
-          CommonViews().customText(
-            textContent: 'SPECIAL OFFERS',
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w700,
-            textColor: AppColors.buttonColor,
-          ),
-          SizedBox(height: 2.h),
-          Expanded(
-            child: offers.isEmpty
-                ? Center(
-              child: CommonViews().customText(
-                textContent: 'No special offers available right now',
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w500,
-                textColor: AppColors.whiteColor,
+      child: GetBuilder<SpecialOffersController>(
+        builder: (controller) {
+          return Column(
+            children: [
+              CommonViews().customText(
+                textContent: S.of(context).specialOffers,
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w700,
+                textColor: AppColors.buttonColor,
               ),
-            )
-                : ListView.builder(
-              itemCount: offers.length,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemBuilder: (context, index) {
-                final offer = offers[index];
-                return _offerCard(offer);
-              },
-            ),
-          ),
-        ],
+              SizedBox(height: 2.h),
+              Expanded(
+                child: _buildBody(controller),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _offerCard(OfferItem offer) {
-    return Stack(
-      children: [
-        Card(
-          color: AppColors.whiteColor,
-          margin: const EdgeInsets.symmetric(vertical: 10),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(width: 2, color: AppColors.buttonColor),
+  Widget _buildBody(SpecialOffersController controller) {
+    if (controller.apiStatus == ApiStatus.loading) {
+      return _buildShimmerList();
+    }
+
+    if (controller.apiStatus == ApiStatus.error) {
+      return RefreshIndicator(
+        onRefresh: () async {
+          await controller.getSpecialOffers();
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.6,
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 6.w),
+                child: CommonViews().customText(
+                  textContent: S.of(context).unableToLoadSpecialOffersRightNow,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w500,
+                  textColor: AppColors.darkBrandColor,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
           ),
-          elevation: 6,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
+        ),
+      );
+    }
+
+    if (controller.apiStatus == ApiStatus.empty) {
+      return RefreshIndicator(
+        onRefresh: () async {
+          await controller.getSpecialOffers();
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.6,
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 6.w),
+                child: CommonViews().customText(
+                  textContent: S.of(context).noSpecialOffersAreAvailableRightNow,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w500,
+                  textColor: AppColors.darkBrandColor,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return  RefreshIndicator(
+      onRefresh: () async {
+        await controller.getSpecialOffers();
+      },
+      child: ListView.builder(
+        itemCount: controller.offers.length,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemBuilder: (context, index) {
+          final offer = controller.offers[index];
+          return _offerCard(offer, controller);
+        },
+      ),
+    );
+  }
+  Widget _offerCard(OfferItem offer, SpecialOffersController controller) {
+    final String description = offer.description.trim().isNotEmpty
+        ? offer.description
+        : S.of(context).enjoyThisLimitedtimeSpecialOfferOnSelectedAssets;
+
+    final String discountLabel = _getDiscountLabel(offer);
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white,
+            const Color(0xfff8f4ff),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(
+          color: AppColors.buttonColor.withAlpha(120),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.buttonColor.withAlpha(25),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(14),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
+                    Container(
                       height: 14.h,
                       width: 30.w,
-                      child: Image.asset(
-                        offer.imagePath,
-                        fit: BoxFit.contain,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: Colors.white,
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withAlpha(20),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: AppCachedImage(
+                        url: offer.image,
+                        width: 30.w,
+                        height: 14.h,
+                        fit: BoxFit.cover,
+                        borderRadius: BorderRadius.circular(18),
+                        placeholder: Container(
+                          width: 30.w,
+                          height: 14.h,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          alignment: Alignment.center,
+                          child: const CircularProgressIndicator(
+                            color: AppColors.darkBrandColor,
+                            strokeWidth: 2,
+                          ),
+                        ),
+                        errorWidget: Container(
+                          width: 30.w,
+                          height: 14.h,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.image_not_supported_outlined,
+                            color: Colors.grey.shade500,
+                            size: 28,
+                          ),
+                        ),
                       ),
                     ),
                     SizedBox(width: 4.w),
@@ -119,367 +222,359 @@ class _SpecialOffersScreenState extends State<SpecialOffersScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           CommonViews().customText(
-                            textContent: offer.title,
+                            textContent: splitTitle(offer.title),
                             textColor: AppColors.darkBrandColor,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 17.sp,
+                          ),
+                          SizedBox(height: 0.8.h),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 2.5.w,
+                              vertical: 0.5.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.deepPurple.withAlpha(20),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: CommonViews().customText(
+                              textContent:  S.of(context).typeLabel(offer.type),
+                              textColor: Colors.deepPurple,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15.sp,
+                            ),
                           ),
                           SizedBox(height: 1.h),
                           CommonViews().customText(
-                            textContent: offer.description,
+                            textContent: description,
                             textColor: Colors.black87,
                             fontWeight: FontWeight.w400,
-                            fontSize: 15.sp,
+                            fontSize: 14.5.sp,
+                            maxLines: 5,
                           ),
                         ],
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 1.5.h),
 
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: CommonViews().customText(
-                    textContent: 'Included Assets',
-                    textColor: AppColors.darkBrandColor,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16.sp,
+                SizedBox(height: 1.8.h),
+
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 3.w,
+                    vertical: 1.2.h,
                   ),
-                ),
-                SizedBox(height: 1.h),
-
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: offer.includedAssets.map((asset) {
-                    return Container(
-                      padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.8.h),
-                      decoration: BoxDecoration(
-                        color: AppColors.buttonColor.withAlpha(31),
-                        borderRadius: BorderRadius.circular(30),
-                        border: Border.all(
-                          color: AppColors.buttonColor,
-                          width: 1,
-                        ),
-                      ),
-                      child: CommonViews().customText(
-                        textContent: asset,
-                        textColor: AppColors.darkBrandColor,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 15.sp,
-                      ),
-                    );
-                  }).toList(),
-                ),
-
-                SizedBox(height: 1.5.h),
-
-                Row(
-                  children: [
-                    Icon(Icons.access_time, size: 18, color: AppColors.buttonColor),
-                    SizedBox(width: 2.w),
-                    Expanded(
-                      child: CommonViews().customText(
-                        textContent: 'Expires on: ${formatDate(offer.expiryDate)}',
-                        textColor: Colors.black87,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14.5.sp,
-                      ),
-                    ),
-                  ],
-                ),
-
-                if (offer.promoCode != null) ...[
-                  SizedBox(height: 1.2.h),
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.2.h),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.confirmation_number_outlined,
-                            color: AppColors.buttonColor),
-                        SizedBox(width: 2.w),
-                        Expanded(
-                          child: CommonViews().customText(
-                            textContent: 'Code: ${offer.promoCode}',
-                            textColor: AppColors.darkBrandColor,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14.5.sp,
-                          ),
-                        ),
-                      ],
+                  decoration: BoxDecoration(
+                    color: AppColors.buttonColor.withAlpha(18),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: AppColors.buttonColor.withAlpha(70),
                     ),
                   ),
-                ],
-
-                SizedBox(height: 2.h),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: CommonViews().customButton(
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.access_time_rounded,
+                        size: 18,
+                        color: AppColors.buttonColor,
+                      ),
+                      SizedBox(width: 2.w),
+                      Expanded(
                         child: CommonViews().customText(
-                          textContent: 'BUY NOW',
-                          textColor: AppColors.darkBrandColor,
-                          fontWeight: FontWeight.w600,
+                          textContent:
+                          '${S.of(context).expiresOn} ${formatDate(offer.endDate)}',
+                          textColor: Colors.black87,
+                          fontWeight: FontWeight.w500,
                           fontSize: 14.sp,
                         ),
-                        color: AppColors.buttonColor,
-                        border: 50,
-                        elevation: 6,
-                        shadowColor: Colors.black,
-                        onTap: () {
-                          // navigate to purchase page
-                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: 1.8.h),
+
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 3.w,
+                        vertical: 1.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withAlpha(10),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          CommonViews().customText(
+                            textContent: offer.price.toStringAsFixed(2),
+                            textColor: Colors.grey,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13.sp,
+                            textDecoration: TextDecoration.lineThrough,
+                          ),
+                          SizedBox(width: 1.5.w),
+                          Image.asset(
+                            "assets/images/coin.png",
+                            width: 16,
+                            height: 16,
+                          ),
+                        ],
                       ),
                     ),
                     SizedBox(width: 3.w),
                     Expanded(
-                      child: actionButton(offer),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 3.5.w,
+                          vertical: 1.1.h,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [
+                              Color(0xffFFD54F),
+                              Color(0xffFFB300),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.amber.withAlpha(70),
+                              blurRadius: 12,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CommonViews().customText(
+                              textContent: offer.offerPrice.toStringAsFixed(2),
+                              textColor: Colors.brown.shade900,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16.sp,
+                            ),
+                            SizedBox(width: 2.w),
+                            Image.asset(
+                              "assets/images/coin.png",
+                              width: 22,
+                              height: 22,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
-                )
+                ),
+
+                SizedBox(height: 2.h),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: CommonViews().customButton(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.shopping_bag_outlined,
+                          color: AppColors.whiteColor,
+                          size: 20,
+                        ),
+                        SizedBox(width: 2.w),
+                        CommonViews().customText(
+                          textContent: S.of(context).buyNow,
+                          textColor: AppColors.whiteColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14.5.sp,
+                        ),
+                      ],
+                    ),
+                    color: AppColors.buttonColor,
+                    border: 50,
+                    elevation: 8,
+                    shadowColor: Colors.black.withAlpha(40),
+                    onTap: () {
+                      controller.buyOffers(
+                        offerId: offer.id.toString(),
+                      );
+                    },
+                  ),
+                ),
               ],
             ),
           ),
-        ),
 
-        Positioned(
-          top: 10,
-          right: 0,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.8.h),
-            decoration: const BoxDecoration(
-              color: Colors.deepPurple,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(16),
-                topRight: Radius.circular(18),
+          Positioned(
+            top: 0,
+            right: AppLocale().isArabic() ? null : 0,
+            left: AppLocale().isArabic() ? 0 : null,
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: 3.5.w,
+                vertical: 0.9.h,
+              ),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xff7C4DFF),
+                    Color(0xff512DA8),
+                  ],
+                ),
+                borderRadius: BorderRadius.only(
+                  topRight: AppLocale().isArabic()
+                      ? Radius.zero
+                      : const Radius.circular(24),
+                  topLeft: AppLocale().isArabic()
+                      ? const Radius.circular(24)
+                      : Radius.zero,
+                  bottomLeft: AppLocale().isArabic()
+                      ? Radius.zero
+                      : const Radius.circular(18),
+                  bottomRight: AppLocale().isArabic()
+                      ? const Radius.circular(18)
+                      : Radius.zero,
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.local_fire_department,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                  SizedBox(width: 1.w),
+                  CommonViews().customText(
+                    textContent: discountLabel,
+                    fontSize: 13.5.sp,
+                    fontWeight: FontWeight.bold,
+                    textColor: Colors.white,
+                  ),
+                ],
               ),
             ),
-            child: CommonViews().customText(
-              textContent: offer.discountLabel,
-              fontSize: 15.sp,
-              fontWeight: FontWeight.bold,
-              textColor: Colors.white,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShimmerList() {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: 3,
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: Colors.grey.shade300,
+          highlightColor: Colors.grey.shade100,
+          child: Card(
+            color: Colors.white,
+            margin: const EdgeInsets.symmetric(vertical: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        height: 14.h,
+                        width: 30.w,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      SizedBox(width: 4.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              height: 2.h,
+                              width: double.infinity,
+                              color: Colors.white,
+                            ),
+                            SizedBox(height: 1.2.h),
+                            Container(
+                              height: 1.8.h,
+                              width: double.infinity,
+                              color: Colors.white,
+                            ),
+                            SizedBox(height: 0.8.h),
+                            Container(
+                              height: 1.8.h,
+                              width: 60.w,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 2.h),
+                  Container(
+                    height: 2.h,
+                    width: double.infinity,
+                    color: Colors.white,
+                  ),
+                  SizedBox(height: 2.h),
+                  Container(
+                    height: 5.5.h,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 
   String formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
-  Widget actionButton(OfferItem offer) {
-    final isActivate = offer.isAutomatic;
 
-    return GestureDetector(
-      onTap: () {
-        if (isActivate) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${offer.title} activated successfully')),
-          );
-        } else {
-          Clipboard.setData(ClipboardData(text: offer.promoCode ?? ''));
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Code copied: ${offer.promoCode}')),
-          );
-        }
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 1.4.h),
-        decoration: BoxDecoration(
-          color: isActivate
-              ? Colors.green.withAlpha(26)
-              : Colors.orange.withAlpha(26),
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(
-            color: isActivate ? Colors.green : Colors.orange,
-            width: 1.5,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              isActivate ? Icons.flash_on : Icons.copy,
-              color: isActivate ? Colors.green : Colors.orange,
-              size: 18,
-            ),
-            SizedBox(width: 2.w),
-            CommonViews().customText(
-              textContent: isActivate ? 'Activate Offer' : 'Copy Code',
-              textColor: isActivate ? Colors.green : Colors.orange,
-              fontWeight: FontWeight.w600,
-              fontSize: 13.5.sp,
-            ),
-          ],
-        ),
-      ),
-    );
+  String _getDiscountLabel(OfferItem offer) {
+    if (offer.discountPercent.trim().isNotEmpty &&
+        offer.discountPercent != '0') {
+      final percent = offer.discountPercent.split('.').first;
+      return '-$percent%';
+    }
+
+    if (offer.discountAmount != null) {
+      return '-${offer.discountAmount}';
+    }
+
+    return 'OFFER';
+  }
+
+  String splitTitle(String text) {
+    final words = text.trim().split(RegExp(r'\s+'));
+
+    if (words.length <= 2) {
+      return text;
+    }
+
+    String firstLine = words.take(2).join(' ');
+    String secondLine = words.skip(2).join(' ');
+
+    return '$firstLine\n$secondLine';
   }
 }
 
-class OfferItem {
-  final String title;
-  final String description;
-  final String conditions;
-  final List<String> includedAssets;
-  final DateTime expiryDate;
-  final String? promoCode;
-  final bool isAutomatic;
-  final String imagePath;
-  final String discountLabel;
 
-  OfferItem({
-    required this.title,
-    required this.description,
-    required this.conditions,
-    required this.includedAssets,
-    required this.expiryDate,
-    required this.promoCode,
-    required this.isAutomatic,
-    required this.imagePath,
-    required this.discountLabel,
-  });
-}
-
-// class SpecialOffersScreen extends StatefulWidget {
-//   const SpecialOffersScreen({super.key});
-//
-//   @override
-//   State<SpecialOffersScreen> createState() => _SpecialOffersScreenState();
-// }
-//
-// class _SpecialOffersScreenState extends State<SpecialOffersScreen> {
-//   final List<Item> allItems = [
-//     Item(name: "SKYSCRAPER", price: "820,800", imagePath: building, category: "Tower", offer: '-20%'),
-//     Item(name: "YACHT", price: "950,600", imagePath: yacht, category: "Yacht", offer: '-15%'),
-//     Item(name: "HOTEL", price: "560,200", imagePath: hotel, category: "Hotel", offer: '-10%'),
-//   ];
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return  CommonBackground(
-//       showAppBar: true,
-//       child: Column(
-//         mainAxisSize: MainAxisSize.min,
-//         children: [
-//           CommonViews().customText(
-//             textContent: 'SPECIAL OFFERS',
-//             fontSize: 20.sp,
-//             fontWeight: FontWeight.w700,
-//             textColor: AppColors.buttonColor,
-//           ),
-//           SizedBox(height: 2.h,),
-//           Expanded(
-//             child: ListView.builder(
-//               itemCount: allItems.length,
-//               padding: const EdgeInsets.symmetric(horizontal: 16),
-//               itemBuilder: (context, index) {
-//                 final item = allItems[index];
-//                 return Stack(
-//                   children: [
-//                     Card(
-//                       color: AppColors.whiteColor,
-//                       margin: const EdgeInsets.symmetric(vertical: 10),
-//                       shape: RoundedRectangleBorder(
-//                         borderRadius: BorderRadius.circular(20),
-//                         side: BorderSide(width: 2, color: AppColors.buttonColor),
-//                       ),
-//                       elevation: 6,
-//                       child: Padding(
-//                         padding: const EdgeInsets.all(16),
-//                         child: Row(
-//                           children: [
-//                             SizedBox(
-//                               height: 15.h,
-//                               width: 35.w,
-//                               child: Image.asset(item.imagePath, fit: BoxFit.contain),
-//                             ),
-//                             SizedBox(width: 10.w),
-//                             Expanded(
-//                               child: Column(
-//                                 crossAxisAlignment: CrossAxisAlignment.start,
-//                                 children: [
-//                                   CommonViews().customText(
-//                                     textContent: item.name,
-//                                     textColor: AppColors.darkBrandColor,
-//                                     fontWeight: FontWeight.w600,
-//                                   ),
-//                                   SizedBox(height: 1.h),
-//                                   CommonViews().customButton(
-//                                     child: CommonViews().customText(
-//                                       textContent: 'BUY',
-//                                       textColor: AppColors.darkBrandColor,
-//                                       fontWeight: FontWeight.w500,
-//                                       fontSize: 16.sp,
-//                                     ),
-//                                     color: AppColors.buttonColor,
-//                                     border: 50,
-//                                     width: 25.w,
-//                                     elevation: 6,
-//                                     shadowColor: Colors.black,
-//                                     onTap: () {},
-//                                   ),
-//                                 ],
-//                               ),
-//                             ),
-//                           ],
-//                         ),
-//                       ),
-//                     ),
-//                     // Positioned offer tag
-//                     Positioned(
-//                       top: 10,
-//                       right: 0,
-//                       child: Container(
-//                         padding:  EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.75.h),
-//                         decoration: BoxDecoration(
-//                           color: Colors.deepPurple,
-//                           borderRadius: const BorderRadius.only(
-//                             bottomLeft: Radius.circular(16),
-//                             topRight: Radius.circular(18),
-//                           ),
-//                         ),
-//                         child: CommonViews().customText(
-//                           textContent: item.offer,
-//                           fontSize: 16.sp,
-//                           fontWeight: FontWeight.bold,
-//                           textColor: Colors.white,
-//                         ),
-//                       ),
-//                     ),
-//                   ],
-//                 );
-//               },
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-//
-// class Item {
-//   final String name;
-//   final String price;
-//   final String imagePath;
-//   final String category;
-//   final String offer;
-//
-//   Item({
-//     required this.name,
-//     required this.price,
-//     required this.imagePath,
-//     required this.category,
-//     required this.offer,
-//   });
-// }

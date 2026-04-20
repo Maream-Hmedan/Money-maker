@@ -6,14 +6,15 @@ import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:money_maker/controllers/api_end_point.dart';
 import 'package:money_maker/controllers/constant_values.dart';
+import 'package:money_maker/controllers/current_session.dart';
 import 'package:money_maker/widgets/helpers/progress_hud.dart';
 
 
-enum ApiStatus { loading, error, success }
+enum PortfolioValueStatus { loading, error, success, guest }
 
 class PortfolioValueController extends GetxController {
   double portfolioValue = 0.0;
-  ApiStatus portfolioValueStatus = ApiStatus.loading;
+  PortfolioValueStatus portfolioValueStatus = PortfolioValueStatus.loading;
 
   @override
   void onInit() {
@@ -23,11 +24,15 @@ class PortfolioValueController extends GetxController {
 
   Future<void> fetchPortfolioValue() async {
     FocusManager.instance.primaryFocus?.unfocus();
-    portfolioValueStatus = ApiStatus.loading;
+    portfolioValueStatus = PortfolioValueStatus.loading;
     update();
+    if (CurrentSession().getUser() == null) {
+      portfolioValueStatus = PortfolioValueStatus.guest;
+      update();
+      return;
+    }
 
     try {
-
       final url = Uri.parse(ApiEndPoint.PORTFOLIO_VALUE_URL);
       final token = GetStorage().read(ConstantValues.TOKEN);
 
@@ -40,29 +45,29 @@ class PortfolioValueController extends GetxController {
         },
       );
 
-
       debugPrint('API Response: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         portfolioValue = (data['portoflio_value'] ?? 0).toDouble();
-        portfolioValueStatus = ApiStatus.success;
+        portfolioValueStatus = PortfolioValueStatus.success;
         update();
       } else {
-        portfolioValueStatus = ApiStatus.error;
+        portfolioValueStatus = PortfolioValueStatus.error;
         update();
         debugPrint('Invalid response: ${response.body}');
       }
     } catch (e) {
-      portfolioValueStatus = ApiStatus.error;
+      portfolioValueStatus = PortfolioValueStatus.error;
       update();
       ProgressHud.shared.stopLoading();
       debugPrint('ERROR $e');
     }
   }
 
-  bool get isLoading => portfolioValueStatus == ApiStatus.loading;
-  bool get isSuccess => portfolioValueStatus == ApiStatus.success;
-  bool get isError => portfolioValueStatus == ApiStatus.error;
+  bool get isLoading => portfolioValueStatus == PortfolioValueStatus.loading;
+  bool get isSuccess => portfolioValueStatus == PortfolioValueStatus.success;
+  bool get isError => portfolioValueStatus == PortfolioValueStatus.error;
+  bool get isGuest => portfolioValueStatus == PortfolioValueStatus.guest;
 }
 

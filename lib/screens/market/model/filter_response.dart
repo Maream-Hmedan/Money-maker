@@ -36,8 +36,8 @@ class FilterResult {
   final String name;
   final String type;
   final String image;
-  final int price;
-  final int priceGrowthRate;
+  final double price;
+  final double priceGrowthRate;
   final int copyCount;
 
   FilterResult({
@@ -60,9 +60,10 @@ class FilterResult {
     name: json["name"] ?? "",
     type: json["type"] ?? "",
     image: json["image"] ?? "",
-    price: (json["price"] ?? 0).toInt(),
-    priceGrowthRate: (json["price_growth_rate"] ?? 0).toInt(),
-    copyCount: (json["copy_count"] ?? 0).toInt(),
+    price: (json["price"] as num?)?.toDouble() ?? 0.0,
+    priceGrowthRate:
+    (json["price_growth_rate"] as num?)?.toDouble() ?? 0.0,
+    copyCount: json["copy_count"] ?? 0,
   );
 
   Map<String, dynamic> toJson() => {

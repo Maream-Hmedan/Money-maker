@@ -1,20 +1,29 @@
-class CancelSaleRequest {
-  final String saleOfferId;
+import 'dart:convert';
 
+class CancelSaleResponse {
+  final List<dynamic> errors;
+  final String message;
+  final String result;
 
-  CancelSaleRequest({
-    required this.saleOfferId,
+  CancelSaleResponse({
+    required this.errors,
+    required this.message,
+    required this.result,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'sale_offer_id': saleOfferId,
-    };
-  }
+  factory CancelSaleResponse.fromRawJson(String str) => CancelSaleResponse.fromJson(json.decode(str));
 
-  factory CancelSaleRequest.fromJson(Map<String, dynamic> json) {
-    return CancelSaleRequest(
-      saleOfferId: json['sale_offer_id']?.toString() ?? '',
-    );
-  }
+  String toRawJson() => json.encode(toJson());
+
+  factory CancelSaleResponse.fromJson(Map<String, dynamic> json) => CancelSaleResponse(
+    errors: List<dynamic>.from(json["errors"].map((x) => x)),
+    message: json["message"],
+    result: json["result"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "errors": List<dynamic>.from(errors.map((x) => x)),
+    "message": message,
+    "result": result,
+  };
 }

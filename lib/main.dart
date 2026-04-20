@@ -7,12 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:money_maker/controllers/current_session.dart';
 import 'package:money_maker/l10n/app_locale.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:sizer/sizer.dart';
+
 import 'firebase_options.dart';
 import 'generated/l10n.dart';
 import 'screens/splash/splash_screen.dart';
@@ -54,6 +56,14 @@ void main() async {
       await SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
       ]);
+      
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          statusBarColor: Colors.white,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
+      );
 
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
@@ -178,6 +188,7 @@ class _MyAppState extends State<MyApp> {
                 return OKToast(
                   child: GetMaterialApp(
                     key: ValueKey(localeModel.currentLocale.languageCode),
+                    initialBinding: InitialBinding(),
                     builder:
                         (context, child) => MediaQuery(
                           data: MediaQuery.of(context).copyWith(
@@ -197,7 +208,9 @@ class _MyAppState extends State<MyApp> {
                       S.delegate,
                     ],
                     title: 'Money Maker',
-                    theme: ThemeData(fontFamily: 'Futura'),
+                    theme: ThemeData(
+                      fontFamily: isArabic ? 'Cairo' : 'Futura',
+                    ),
                     debugShowCheckedModeBanner: false,
                     themeMode: ThemeMode.system,
                     home: home,
@@ -209,5 +222,11 @@ class _MyAppState extends State<MyApp> {
         },
       ),
     );
+  }
+}
+class InitialBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.put(SessionController(), permanent: true);
   }
 }

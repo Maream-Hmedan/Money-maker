@@ -2,10 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:money_maker/controllers/api_end_point.dart';
+import 'package:money_maker/l10n/app_local_controller.dart';
 import 'package:money_maker/l10n/app_locale.dart';
 import 'package:money_maker/screens/get_countries/model/countries_response.dart';
 
-class CountriesController extends GetxController{
+class CountriesController extends GetxController with LocaleAwareController {
   List<Countries> countries = [];
 
 
@@ -35,5 +36,10 @@ class CountriesController extends GetxController{
       }
     }
 
+  }
+
+  @override
+  Future<void> onLocaleChanged() async {
+     await fetchCountries();
   }
 }

@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:yalla_activity/l10n/app_locale.dart';
+import 'package:money_maker/l10n/app_locale.dart';
 
 mixin LocaleAwareController on GetxController {
   void onLocaleChanged();

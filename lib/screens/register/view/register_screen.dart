@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/get_instance.dart';
@@ -12,14 +13,17 @@ import 'package:money_maker/controllers/app_navigation.dart';
 import 'package:money_maker/controllers/app_size.dart';
 import 'package:money_maker/controllers/styles.dart';
 import 'package:money_maker/generated/l10n.dart';
+import 'package:money_maker/l10n/app_locale.dart';
 import 'package:money_maker/screens/get_countries/controller/countries_controller.dart';
 import 'package:money_maker/screens/get_countries/model/countries_response.dart';
 import 'package:money_maker/screens/login/view/login_screen.dart';
 import 'package:money_maker/screens/register/controller/register_controller.dart';
+import 'package:money_maker/screens/settings/privacy_policy/view/privacy_policy_screen.dart';
 import 'package:money_maker/widgets/background_widget.dart';
 import 'package:money_maker/widgets/button_widget.dart';
 import 'package:money_maker/widgets/common_views.dart';
 import 'package:money_maker/widgets/text_field_widget.dart';
+import 'package:money_maker/widgets/text_phone_field_widget.dart';
 import 'package:sizer/sizer.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -67,7 +71,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final GlobalKey<FormState> _key = GlobalKey();
 
   final RegisterController _registerController = Get.put(RegisterController());
-
+  final showPassword = RxBool(true);
+  final showConfirmPassword = RxBool(true);
+  final errorCompanyNameMessage = RxString('');
+  final FocusNode _companyNameFocusNode = FocusNode();
+  final TextEditingController _companyNameController = TextEditingController();
   Countries? selectedCountry;
 
   final prefix = ''.obs;
@@ -89,6 +97,49 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                Align(
+                  alignment:
+                      AppLocale().isArabic()
+                          ? Alignment.topLeft
+                          : Alignment.topRight,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(30),
+                    onTap: () async {
+                      final newLocale =
+                          AppLocale().isArabic()
+                              ? const Locale('en')
+                              : const Locale('ar');
+
+                      await AppLocale().setLocale(newLocale);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(
+                          color: AppColors.buttonColor.withAlpha(64),
+                        ),
+                        color: AppColors.buttonColor.withAlpha(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.language, size: 18.sp),
+                          SizedBox(width: 2.w),
+                          Text(
+                            AppLocale().isArabic() ? 'EN' : 'AR',
+                            style: Styles().smallText.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
                 Image.asset(
                   appLogo,
                   width: AppSize.logoWidthSignUpLogIn,
@@ -102,7 +153,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   focusNode: _nameFocusNode,
                   keyboardType: TextInputType.emailAddress,
                   hint: S.of(context).fullName,
-                  onSubmitted: (v) => _emailFocusNode.requestFocus(),
+                  onSubmitted: (v) => _companyNameFocusNode.requestFocus(),
                   validator: (v) {
                     if (v == null || v.isEmpty) {
                       errorNameMessage.value =
@@ -115,6 +166,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Obx(() {
                   return errorNameMessage.isNotEmpty
                       ? _errorText(errorNameMessage.value)
+                      : const SizedBox.shrink();
+                }),
+                SizedBox(height: AppSize.heightBetweenTextField),
+                TextFieldWidget(
+                  controller: _companyNameController,
+                  focusNode: _companyNameFocusNode,
+                  keyboardType: TextInputType.text,
+                  hint: S.of(context).companyName,
+                  onSubmitted: (v) => _emailFocusNode.requestFocus(),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) {
+                      errorCompanyNameMessage.value =
+                          S.of(context).pleaseEnterCompanyName;
+                      return "";
+                    }
+                    if (v.length < 3) {
+                      errorCompanyNameMessage.value =
+                          S.of(context).companyNameTooShort;
+                      return "";
+                    }
+                    return null;
+                  },
+                ),
+                Obx(() {
+                  return errorCompanyNameMessage.isNotEmpty
+                      ? _errorText(errorCompanyNameMessage.value)
                       : const SizedBox.shrink();
                 }),
                 SizedBox(height: AppSize.heightBetweenTextField),
@@ -156,22 +233,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 SizedBox(height: AppSize.heightBetweenTextField),
                 GetBuilder<CountriesController>(
                   builder: (controller) {
-                    Countries? defaultCountry;
-                    if (controller.countries.isNotEmpty) {
-                      defaultCountry = controller.countries.firstWhere(
-                        (c) => c.name.toLowerCase().contains('jordan'),
-                        orElse: () => controller.countries.first,
-                      );
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        prefix.value = selectedCountry?.prefix ?? '';
-                      });
-                    }
+                    Countries? updatedSelectedCountry;
 
-                    selectedCountry ??= defaultCountry;
+                    if (controller.countries.isNotEmpty) {
+                      if (selectedCountry != null) {
+                        updatedSelectedCountry = controller.countries
+                            .firstWhere(
+                              (c) => c.id == selectedCountry!.id,
+                              orElse: () => controller.countries.first,
+                            );
+                      } else {
+                        updatedSelectedCountry = controller.countries
+                            .firstWhere(
+                              (c) => c.isoCode == "JO",
+                              orElse: () => controller.countries.first,
+                            );
+                      }
+
+                      if (selectedCountry?.id != updatedSelectedCountry.id) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          setState(() {
+                            selectedCountry = updatedSelectedCountry;
+                            prefix.value = selectedCountry?.prefix ?? '';
+                          });
+                        });
+                      }
+                    }
 
                     return DropdownSearch<Countries>(
                       items: controller.countries,
-                      selectedItem: selectedCountry,
+                      selectedItem: updatedSelectedCountry ?? selectedCountry,
                       enabled: controller.countries.isNotEmpty,
                       onChanged: (value) {
                         setState(() {
@@ -211,7 +302,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       dropdownBuilder: (context, item) {
                         if (item == null) {
                           return CommonViews().customText(
-                            textContent: 'Select Country',
+                            textContent: S.of(context).selectCountry,
                             textColor: Colors.grey,
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w400,
@@ -256,7 +347,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         showSearchBox: true,
                         searchFieldProps: TextFieldProps(
                           decoration: InputDecoration(
-                            hintText: 'Search Country',
+                            hintText: S.of(context).searchCountry,
                             prefixIcon: const Icon(
                               Icons.search,
                               color: Colors.grey,
@@ -345,23 +436,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 SizedBox(height: AppSize.heightBetweenTextField),
                 Obx(() {
-                  return TextFieldWidget(
+                  return TextPhoneFieldWidget(
                     controller: _phoneController,
                     focusNode: _phoneFocusNode,
                     onSubmitted: (v) => _passFocusNode.requestFocus(),
                     keyboardType: TextInputType.phone,
                     prefixText: '${prefix.value} | ',
-                    hint: 'Phone Number',
+
+                    hint: ' ${S.of(context).phoneNumber}',
                     maxLength: 10,
                     validator: (v) {
                       if (v == null || v.isEmpty) {
                         errorPhoneMessage.value =
-                            "Please verify the phone number.";
+                            S.of(context).pleaseVerifyThePhoneNumber;
                         return "";
                       }
                       if (v.length < 9 || v.length > 10) {
                         errorPhoneMessage.value =
-                            "Please enter a valid phone number.";
+                            S.of(context).pleaseEnterAValidPhoneNumber;
                         return "";
                       }
                       return null;
@@ -374,30 +466,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       : const SizedBox.shrink();
                 }),
                 SizedBox(height: AppSize.heightBetweenTextField),
-                TextFieldWidget(
-                  controller: _passController,
-                  focusNode: _passFocusNode,
-                  keyboardType: TextInputType.multiline,
-                  isObscure: true,
-                  onSubmitted: (v) => _confirmPassFocusNode.requestFocus(),
-                  hint: S.of(context).password,
-                  validator: (v) {
-                    if (v == null || v.isEmpty) {
-                      errorPassMessage.value =
-                          S
-                              .of(context)
-                              .thePasswordMustBeAtLeast8CharactersOrDigits;
-                      return "";
-                    }
-                    if (v.length < 8) {
-                      errorPassMessage.value =
-                          S
-                              .of(context)
-                              .thePasswordMustBeAtLeast8CharactersOrDigits;
-                      return "";
-                    }
-                    return null;
-                  },
+                Obx(
+                  () => TextFieldWidget(
+                    controller: _passController,
+                    focusNode: _passFocusNode,
+                    keyboardType: TextInputType.multiline,
+                    isObscure: showPassword.value,
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        showPassword.value = !showPassword.value;
+                      },
+                      icon: Icon(
+                        showPassword.value
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: AppColors.buttonColor,
+                      ),
+                    ),
+                    onSubmitted: (v) => _confirmPassFocusNode.requestFocus(),
+                    hint: S.of(context).password,
+                    validator: (v) {
+                      if (v == null || v.isEmpty) {
+                        errorPassMessage.value =
+                            S
+                                .of(context)
+                                .thePasswordMustBeAtLeast8CharactersOrDigits;
+                        return "";
+                      }
+                      if (v.length < 8) {
+                        errorPassMessage.value =
+                            S
+                                .of(context)
+                                .thePasswordMustBeAtLeast8CharactersOrDigits;
+                        return "";
+                      }
+                      return null;
+                    },
+                  ),
                 ),
                 Obx(() {
                   return errorPassMessage.isNotEmpty
@@ -405,36 +510,50 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       : const SizedBox.shrink();
                 }),
                 SizedBox(height: AppSize.heightBetweenTextField),
-                TextFieldWidget(
-                  controller: _confirmPassController,
-                  focusNode: _confirmPassFocusNode,
-                  keyboardType: TextInputType.multiline,
-                  isObscure: true,
-                  hint: S.of(context).confirmPassword,
-                  onSubmitted:
-                      (v) => FocusManager.instance.primaryFocus?.unfocus(),
-                  validator: (v) {
-                    if (v == null || v.isEmpty) {
-                      errorConfirmPassMessage.value =
-                          S
-                              .of(context)
-                              .thePasswordMustBeAtLeast8CharactersOrDigits;
-                      return "";
-                    }
-                    if (v.length < 8) {
-                      errorConfirmPassMessage.value =
-                          S
-                              .of(context)
-                              .thePasswordMustBeAtLeast8CharactersOrDigits;
-                      return "";
-                    }
-                    if (v != _passController.text) {
-                      errorConfirmPassMessage.value =
-                          S.of(context).pleaseMakeSureBothPasswordsAreTheSame;
-                      return "";
-                    }
-                    return null;
-                  },
+                Obx(
+                  () => TextFieldWidget(
+                    controller: _confirmPassController,
+                    focusNode: _confirmPassFocusNode,
+                    keyboardType: TextInputType.multiline,
+                    isObscure: showConfirmPassword.value,
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        showConfirmPassword.value = !showConfirmPassword.value;
+                      },
+                      icon: Icon(
+                        showConfirmPassword.value
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: AppColors.buttonColor,
+                      ),
+                    ),
+                    hint: S.of(context).confirmPassword,
+                    onSubmitted:
+                        (v) => FocusManager.instance.primaryFocus?.unfocus(),
+                    validator: (v) {
+                      if (v == null || v.isEmpty) {
+                        errorConfirmPassMessage.value =
+                            S
+                                .of(context)
+                                .thePasswordMustBeAtLeast8CharactersOrDigits;
+                        return "";
+                      }
+                      if (v.length < 8) {
+                        errorConfirmPassMessage.value =
+                            S
+                                .of(context)
+                                .thePasswordMustBeAtLeast8CharactersOrDigits;
+                        return "";
+                      }
+                      if (v != _passController.text) {
+                        errorConfirmPassMessage.value =
+                            S.of(context).pleaseMakeSureBothPasswordsAreTheSame;
+                        return "";
+                      }
+                      return null;
+                    },
+
+                  ),
                 ),
                 Obx(() {
                   return errorConfirmPassMessage.isNotEmpty
@@ -447,6 +566,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   border: AppSize.radiusButtonSignInSignUp,
                   onTap: () async {
                     errorNameMessage.value = '';
+                    errorCompanyNameMessage.value = '';
                     errorEmailMessage.value = '';
                     errorPhoneMessage.value = '';
                     errorPassMessage.value = '';
@@ -454,6 +574,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     if (_key.currentState!.validate()) {
                       await _registerController.register(
                         name: _nameController.text.trim(),
+                        companyName: _companyNameController.text.trim(),
                         email: _emailController.text.trim(),
                         password: _passController.text.trim(),
                         confirmPassword: _confirmPassController.text.trim(),
@@ -462,18 +583,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       );
                     }
                   },
-                  child: Text('Sign Up', style: Styles().buttonText),
+                  child: Text(S.of(context).signUp, style: Styles().buttonText),
                 ),
                 SizedBox(height: AppSize.heightBetweenTextAndButton),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Already have an account? ", style: Styles().midText),
+                    Text(
+                      S.of(context).alreadyHaveAnAccount,
+                      style: Styles().midText,
+                    ),
                     GestureDetector(
                       onTap: () {
                         AppNavigator.of(context).push(LoginScreen());
                       },
-                      child: Text("Sign In", style: Styles().mainText),
+                      child: Text(
+                        S.of(context).signIn,
+                        style: Styles().mainText,
+                      ),
                     ),
                   ],
                 ),
@@ -483,21 +610,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   text: TextSpan(
                     style: Styles().bottomText,
                     children: [
-                      const TextSpan(text: 'By signing up, you agree to our '),
-
                       TextSpan(
-                        text: 'Terms',
-                        style: Styles().bottomText.copyWith(
-                          color: const Color(0xFF380E87),
-                        ),
+                        text: ' ${S.of(context).bySigningUpYouAgreeToOur} ',
                       ),
-
-                      const TextSpan(text: ' and '),
                       TextSpan(
-                        text: 'Privacy Policy',
+                        text: S.of(context).terms,
                         style: Styles().bottomText.copyWith(
                           color: const Color(0xFF380E87),
                         ),
+                        recognizer:
+                            TapGestureRecognizer()
+                              ..onTap = () {
+                                AppNavigator.of(
+                                  context,
+                                  rootNavigator: true,
+                                ).push(PrivacyPolicyScreen());
+                              },
+                      ),
+                      TextSpan(text: ' ${S.of(context).and} '),
+                      TextSpan(
+                        text: S.of(context).privacyPolicyBottom,
+                        style: Styles().bottomText.copyWith(
+                          color: const Color(0xFF380E87),
+                        ),
+                        recognizer:
+                            TapGestureRecognizer()
+                              ..onTap = () {
+                                AppNavigator.of(
+                                  context,
+                                  rootNavigator: true,
+                                ).push(PrivacyPolicyScreen());
+                              },
                       ),
                     ],
                   ),

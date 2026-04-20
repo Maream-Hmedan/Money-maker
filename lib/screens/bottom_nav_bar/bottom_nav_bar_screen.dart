@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:money_maker/controllers/app_colors.dart';
 import 'package:money_maker/generated/l10n.dart';
 import 'package:money_maker/screens/home/home_screen.dart';
-import 'package:money_maker/screens/portfolio/portfolio_screen.dart';
+import 'package:money_maker/screens/profile/view/profile_screen.dart';
 import 'package:money_maker/screens/settings/settings_screen.dart';
-import 'package:money_maker/screens/top/top_screen.dart';
+import 'package:money_maker/screens/top/view/top_screen.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:sizer/sizer.dart';
 
@@ -21,8 +21,8 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
 
   final List<BottomTabModel> _bottomTabs = [
     BottomTabModel(icon: const Icon(Icons.home), view: HomeScreen()),
-    BottomTabModel(icon: const Icon(Icons.bar_chart), view: PortfolioScreen()),
-    BottomTabModel(icon: const Icon(Icons.emoji_events), view: TopPlayersPage()),
+    BottomTabModel(icon: const Icon(Icons.person), view: ProfileScreen()),
+    BottomTabModel(icon: const Icon(Icons.emoji_events), view: TopPlayersPage(showAppBar: false,)),
     BottomTabModel(icon: const Icon(Icons.settings), view: SettingsScreen()),
   ];
 
@@ -68,7 +68,7 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
       ),
       items: [
         _navItem(Icons.home, S.of(context).home),
-        _navItem(Icons.bar_chart, S.of(context).portfolio),
+        _navItem(Icons.person,S.of(context).myProfile),
         _navItem(Icons.emoji_events, S.of(context).top),
         _navItem(Icons.settings, S.of(context).settings),
       ],

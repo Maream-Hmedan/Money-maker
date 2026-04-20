@@ -14,17 +14,34 @@ import 'package:money_maker/controllers/current_session.dart';
 import 'package:money_maker/controllers/styles.dart';
 import 'package:money_maker/generated/l10n.dart';
 import 'package:money_maker/l10n/app_locale.dart';
-import 'package:money_maker/screens/change_password/view/change_Password_screen.dart';
+import 'package:money_maker/screens/build_company/widgets/build_company/controller/build_company_controller.dart';
+import 'package:money_maker/screens/change_password/controller/reset_pass_controller.dart';
+import 'package:money_maker/screens/change_password/view/change_password_screen.dart';
+import 'package:money_maker/screens/home/widget/balance_value/balance_value_controller.dart';
+import 'package:money_maker/screens/home/widget/portfolio_value/portfolio_value_controller.dart';
 import 'package:money_maker/screens/login/view/login_screen.dart';
-import 'package:money_maker/screens/notification/notification_screen.dart';
-import 'package:money_maker/screens/payment/payment_screen.dart';
-import 'package:money_maker/screens/profile/view/profile_screen.dart';
+import 'package:money_maker/screens/market/controller/market_controller.dart';
+import 'package:money_maker/screens/market_place/controller/market_place_controller.dart';
+import 'package:money_maker/screens/notification/controller/notification_controller.dart';
+import 'package:money_maker/screens/portfolio/controller/portfolio_controller.dart';
+import 'package:money_maker/screens/profile/controller/get_profile_controller.dart';
+import 'package:money_maker/screens/settings/contact_us/view/contact_us_screen.dart';
+import 'package:money_maker/screens/settings/privacy_policy/view/privacy_policy_screen.dart';
+import 'package:money_maker/screens/special_offers/controller/special_offers_controller.dart';
+import 'package:money_maker/screens/top/controller/top_controller.dart';
+import 'package:money_maker/screens/top_up_balance/controller/top_up_controller.dart';
+import 'package:money_maker/screens/top_up_balance/view/top_up_balance_screen.dart';
+import 'package:money_maker/screens/transaction_history/controller/transaction_history_controller.dart';
+import 'package:money_maker/screens/transaction_history/view/transaction_history_screen.dart';
 import 'package:money_maker/widgets/background_widget.dart';
 import 'package:money_maker/widgets/button_widget.dart';
 import 'package:money_maker/widgets/common_views.dart';
 import 'package:money_maker/widgets/helpers/progress_hud.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:sizer/sizer.dart';
+
+import 'delete_account/controller/delete_my_account_controller.dart'
+    show DeleteMyAccount;
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -37,8 +54,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final GlobalKey<PopupMenuButtonState<String>> _langMenuKey =
       GlobalKey<PopupMenuButtonState<String>>();
 
+  final DeleteMyAccount _deleteAccountController = Get.put(DeleteMyAccount());
+
   @override
   Widget build(BuildContext context) {
+    final isGuest = CurrentSession().getUser() == null;
+
     return CommonBackground(
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -51,7 +72,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               fit: BoxFit.cover,
             ),
             CommonViews().customText(
-              textContent: "SETTINGS",
+              textContent: S.of(context).settings,
               fontSize: 20.sp,
               fontWeight: FontWeight.w700,
               textColor: AppColors.buttonColor,
@@ -62,73 +83,109 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 padding: EdgeInsets.zero,
                 children: [
                   SizedBox(height: 1.h),
-                  buildSettingItem(
-                    title: S.of(context).profileInformation,
-                    onTap: () {
-                      AppNavigator.of(context).push(ProfileScreen());
-                    },
-                    showDivider: true,
-                  ),
-                  buildSettingItem(
-                    title: S.of(context).changePassword,
-                    onTap: () {
-                      AppNavigator.of(context).push(ChangePasswordScreen());
-                    },
-                    showDivider: true,
-                  ),
-                  buildSettingItem(
-                    title: S.of(context).notification,
-                    onTap: () {
-                      AppNavigator.of(context).push(NotificationScreen());
-                    },
-                    showDivider: true,
-                  ),
 
-                  buildSettingItem(
-                    title: S.of(context).payment,
-                    onTap: () {
-                      AppNavigator.of(context).push(PaymentScreen());
-                    },
-                    showDivider: true,
-                  ),
+                  if (!isGuest) ...[
+                    buildSettingItem(
+                      title: S.of(context).changePassword,
+                      onTap: () {
+                        AppNavigator.of(
+                          context,
+                          rootNavigator: true,
+                        ).push(ChangePasswordScreen());
+                      },
+                      showDivider: true,
+                    ),
+                    buildSettingItem(
+                      title: S.of(context).topUpYourBalance,
+                      onTap: () {
+                        AppNavigator.of(
+                          context,
+                          rootNavigator: true,
+                        ).push(BalanceTopUpScreen());
+                      },
+                      showDivider: true,
+                    ),
+                    buildSettingItem(
+                      title: S.of(context).payment,
+                      onTap: () {
+                        AppNavigator.of(
+                          context,
+                          rootNavigator: true,
+                        ).push(TransactionHistoryScreen());
+                      },
+                      showDivider: true,
+                    ),
+                  ],
+
                   buildSettingItem(
                     title: S.of(context).changeLanguage,
                     onTap: _openLanguageMenu,
                     showDivider: true,
                     trailing: changeLanguageTheme(context),
                   ),
+                  buildSettingItem(
+                    title: S.of(context).contactUs,
+                    onTap: () {
+                      AppNavigator.of(
+                        context,
+                        rootNavigator: true,
+                      ).push(ContactUsScreen());
+                    },
+                    showDivider: true,
+                  ),
+                  buildSettingItem(
+                    title: S.of(context).privacyPolicyTerms,
+                    onTap: () {
+                      AppNavigator.of(
+                        context,
+                        rootNavigator: true,
+                      ).push(PrivacyPolicyScreen());
+                    },
+                    showDivider: !isGuest,
+                  ),
 
-                  buildSettingItem(
-                    title:  S.of(context).contactUs,
-                    onTap: () {},
-                    showDivider: true,
-                  ),
-                  buildSettingItem(
-                    title:  S.of(context).privacyPolicyTerms,
-                    onTap: () {},
-                    showDivider: true,
-                  ),
-                  buildSettingItem(
-                    title: S.of(context).deleteMyAccount,
-                    onTap: () {
-                      deleteAccountDialog(context);
-                    },
-                    showDivider: false,
-                  ),
-                  SizedBox(height: 2.h,),
-                  ButtonWidget(
-                    color: AppColors.buttonColor,
-                    border: AppSize.radiusButtonSignInSignUp,
-                    onTap: () {
-                      _logOut();
-                    },
-                    child: Text(S.of(context).logOut, style: Styles().buttonText),
-                  ),
-                  SizedBox(height: 2.h,),
+                  if (!isGuest) ...[
+                    buildSettingItem(
+                      title: S.of(context).deleteMyAccount,
+                      onTap: () {
+                        deleteAccountDialog(context);
+                      },
+                      showDivider: false,
+                    ),
+                    SizedBox(height: 2.h),
+                    ButtonWidget(
+                      color: AppColors.buttonColor,
+                      border: AppSize.radiusButtonSignInSignUp,
+                      onTap: () {
+                        _logOut();
+                      },
+                      child: Text(
+                        S.of(context).logOut,
+                        style: Styles().buttonText,
+                      ),
+                    ),
+                  ] else ...[
+                    SizedBox(height: 2.h),
+                    ButtonWidget(
+                      color: AppColors.buttonColor,
+                      border: AppSize.radiusButtonSignInSignUp,
+                      onTap: () {
+                        AppNavigator.of(
+                          context,
+                          rootNavigator: true,
+                        ).pushAndRemoveUntil(LoginScreen());
+                      },
+                      child: Text(
+                        S.of(context).logIn,
+                        style: Styles().buttonText,
+                      ),
+                    ),
+                  ],
+
+                  SizedBox(height: 2.h),
                 ],
               ),
             ),
-
           ],
         ),
       ),
@@ -261,6 +318,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
+                  _deleteAccountController.deleteAccount();
                 },
                 child: Text(
                   S.of(context).yes,
@@ -284,27 +342,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
       final response = await http.post(
         url,
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
+        headers: {'Authorization': 'Bearer $token'},
       );
       ProgressHud.shared.stopLoading();
-      if (response.statusCode == 200 ) {
+      if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['status'] == true) {
           CurrentSession().clear();
-          AppNavigator.of(Get.context!).push(LoginScreen());
+          GetStorage().erase();
+          Get.delete<PortfolioValueController>();
+          Get.delete<MarketController>();
+          Get.delete<ProfileController>();
+          Get.delete<CompanyController>();
+          Get.delete<ChangePasswordController>();
+          Get.delete<BalanceValueController>();
+          Get.delete<MarketPlaceController>();
+          Get.delete<NotificationController>();
+          Get.delete<PortfolioController>();
+          Get.delete<SpecialOffersController>();
+          Get.delete<TopLeaderBoardController>();
+          Get.delete<TransactionHistoryController>();
+          Get.delete<TopUpController>();
+          AppNavigator.of(Get.context!).pushAndRemoveUntil(LoginScreen());
         } else {
           debugPrint('Logout failed: ${data['message']}');
         }
       } else {
         debugPrint('Invalid response: ${response.body}');
       }
-
     } catch (e) {
       ProgressHud.shared.stopLoading();
       debugPrint('ERROR $e');
     }
   }
-
 }

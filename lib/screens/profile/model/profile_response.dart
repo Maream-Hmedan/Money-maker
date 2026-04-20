@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-class{
+class UserProfileResponse {
   final int id;
   final String name;
   final String email;
   final String phoneNumber;
   final CountryProfile country;
-  final int balance;
-  final int portoflioValue;
+  final double balance;
+  final double portoflioValue;
 
   UserProfileResponse({
     required this.id,
@@ -26,13 +26,13 @@ class{
 
   factory UserProfileResponse.fromJson(Map<String, dynamic> json) {
     return UserProfileResponse(
-      id: json["id"] ?? 0,
-      name: json["name"] ?? '',
-      email: json["email"] ?? '',
-      phoneNumber: json["phone_number"] ?? '',
+      id: _toInt(json["id"]) ?? 0,
+      name: json["name"]?.toString() ?? '',
+      email: json["email"]?.toString() ?? '',
+      phoneNumber: json["phone_number"]?.toString() ?? '',
       country: CountryProfile.fromJson(json["country"] ?? {}),
-      balance: json["balance"] ?? 0,
-      portoflioValue: json["portoflio_value"] ?? 0,
+      balance: _toDouble(json["balance"]),
+      portoflioValue: _toDouble(json["portoflio_value"]),
     );
   }
 
@@ -54,8 +54,8 @@ class{
     String? email,
     String? phoneNumber,
     CountryProfile? country,
-    int? balance,
-    int? portoflioValue,
+    double? balance,
+    double? portoflioValue,
   }) {
     return UserProfileResponse(
       id: id ?? this.id,
@@ -66,6 +66,19 @@ class{
       balance: balance ?? this.balance,
       portoflioValue: portoflioValue ?? this.portoflioValue,
     );
+  }
+
+  static int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    return int.tryParse(value.toString());
+  }
+
+  static double _toDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    return double.tryParse(value.toString()) ?? 0.0;
   }
 }
 

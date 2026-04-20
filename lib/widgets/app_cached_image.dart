@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:money_maker/controllers/app_colors.dart';
 import 'package:sizer/sizer.dart';
-import 'package:yalla_activity/configuration/app_colors.dart';
 
 class AppCachedImage extends StatelessWidget {
   final String? url;
@@ -43,7 +43,7 @@ class AppCachedImage extends StatelessWidget {
       color: Colors.grey.shade200,
       alignment: Alignment.center,
       child: const CircularProgressIndicator(
-        color: AppColors.brandColorDark,
+        color: AppColors.darkBrandColor,
         strokeWidth: 2,
       ),
     );

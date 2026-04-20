@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -8,8 +9,12 @@ import 'package:money_maker/controllers/app_images.dart';
 import 'package:money_maker/controllers/app_navigation.dart';
 import 'package:money_maker/controllers/app_size.dart';
 import 'package:money_maker/controllers/styles.dart';
-import 'package:money_maker/screens/build_company/widgets/start_game_screen.dart';
+import 'package:money_maker/generated/l10n.dart';
+import 'package:money_maker/l10n/app_locale.dart';
+import 'package:money_maker/screens/build_company/widgets/build_company/controller/build_company_controller.dart';
+import 'package:money_maker/screens/build_company/widgets/build_company/model/company_categories_response.dart';
 import 'package:money_maker/widgets/text_field_widget.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:sizer/sizer.dart';
 
 class BuildCompanyScreen extends StatefulWidget {
@@ -22,6 +27,7 @@ class BuildCompanyScreen extends StatefulWidget {
 class _BuildCompanyScreenState extends State<BuildCompanyScreen>
     with SingleTickerProviderStateMixin {
   final GlobalKey<FormState> _key = GlobalKey();
+  final CompanyController _companyController = Get.put(CompanyController());
   late AnimationController _btnController;
   late Animation<double> _scaleAnimation;
 
@@ -39,18 +45,10 @@ class _BuildCompanyScreenState extends State<BuildCompanyScreen>
   final errorCategoryMessage = RxString('');
   final errorLogoMessage = RxString('');
 
-  String selectedCategory = '';
+  CompanyCategories? selectedCategory;
 
   File? logoFile;
 
-  final List<String> categories = [
-    'Tech',
-    'Finance',
-    'Gaming',
-    'AI',
-    'E-commerce',
-    'Education',
-  ];
 
   @override
   void initState() {
@@ -65,6 +63,7 @@ class _BuildCompanyScreenState extends State<BuildCompanyScreen>
       begin: 0.95,
       end: 1,
     ).animate(CurvedAnimation(parent: _btnController, curve: Curves.easeInOut));
+    Get.put(CompanyController());
   }
 
   @override
@@ -111,6 +110,13 @@ class _BuildCompanyScreenState extends State<BuildCompanyScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    Align(
+                        alignment:
+                            AppLocale().isArabic()
+                                ? Alignment.topRight
+                                : Alignment.topLeft,
+                        child: _backButton(),
+                      ),
                     Image.asset(
                       appLogo,
                       width: AppSize.logoWidthSignUpLogIn,
@@ -118,7 +124,7 @@ class _BuildCompanyScreenState extends State<BuildCompanyScreen>
                       fit: BoxFit.cover,
                     ),
                     Text(
-                      'BUILD YOUR COMPANY',
+                      S.of(context).buildYourCompany,
                       style: Styles().bigText.copyWith(color: Colors.white),
                     ),
                     SizedBox(height: AppSize.heightBetweenTextField),
@@ -159,7 +165,7 @@ class _BuildCompanyScreenState extends State<BuildCompanyScreen>
                                     ),
                                     SizedBox(height: 6),
                                     Text(
-                                      'Add Logo',
+                                      S.of(context).addLogo,
                                       style: Styles().smallText.copyWith(
                                         color: AppColors.whiteColor,
                                       ),
@@ -211,13 +217,15 @@ class _BuildCompanyScreenState extends State<BuildCompanyScreen>
                       controller: _companyNameController,
                       focusNode: _companyFocus,
                       keyboardType: TextInputType.text,
-                      label: 'Company Name',
-                      hint: 'Enter company name',
+                      label: S.of(context).companyName,
+                      hint: S.of(context).enterCompanyName,
                       onSubmitted: (v) => _founderFocus.requestFocus(),
                       validator: (v) {
                         if (v == null || v.isEmpty) {
                           errorCompanyNameMessage.value =
-                              'Please give your company a name that shines!';
+                              S
+                                  .of(context)
+                                  .pleaseGiveYourCompanyANameThatShines;
                           return "";
                         }
                         return null;
@@ -236,13 +244,15 @@ class _BuildCompanyScreenState extends State<BuildCompanyScreen>
                       controller: _founderNameController,
                       focusNode: _founderFocus,
                       keyboardType: TextInputType.text,
-                      label: 'Founder Name',
-                      hint: 'Your name',
+                      label: S.of(context).founderName,
+                      hint: S.of(context).yourName,
                       onSubmitted: (v) => _descFocus.requestFocus(),
                       validator: (v) {
                         if (v == null || v.isEmpty) {
                           errorFounderNameMessage.value =
-                              'Your company needs a founder — fill in your name!';
+                              S
+                                  .of(context)
+                                  .yourCompanyNeedsAFounderFillInYourName;
                           return "";
                         }
                         return null;
@@ -258,57 +268,87 @@ class _BuildCompanyScreenState extends State<BuildCompanyScreen>
                     SizedBox(height: AppSize.heightBetweenTextField),
 
                     Align(
-                      alignment: Alignment.centerLeft,
+                      alignment:
+                          AppLocale().isArabic()
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
                       child: Text(
-                        'Category',
+                        S.of(context).category,
                         style: Styles().midText.copyWith(color: Colors.white70),
                       ),
                     ),
                     SizedBox(height: AppSize.heightBetweenTextField),
+                    GetBuilder<CompanyController>(
+                      builder: (controller) {
+                        if (controller.categoriesStatus == ApiStatus.loading) {
+                          return const CompanyCategoriesShimmer();
+                        }
 
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children:
-                          categories.map((cat) {
-                            final isSelected = cat == selectedCategory;
+                        if (controller.categoriesStatus == ApiStatus.error) {
+                          return Center(
+                            child: Text(
+                              S.of(context).unableToLoadCategoriesRightNowPleaseTryAgainLater,
+                              style: Styles().smallText.copyWith(color: Colors.white),
+                            ),
+                          );
+                        }
 
-                            return GestureDetector(
-                              onTap: () {
-                                setState(() => selectedCategory = cat);
-                              },
-                              child: AnimatedContainer(
-                                duration: Duration(milliseconds: 250),
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 10,
-                                ),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(30),
-                                  color:
-                                      isSelected
-                                          ? primary
-                                          : Colors.white.withAlpha(25),
-                                  boxShadow:
-                                      isSelected
-                                          ? [
-                                            BoxShadow(
-                                              color: glow.withAlpha(140),
-                                              blurRadius: 14,
-                                            ),
-                                          ]
-                                          : [],
-                                ),
-                                child: Text(
-                                  cat,
-                                  style: Styles().smallText.copyWith(
-                                    color: Colors.white,
+                        if (controller.categoriesStatus == ApiStatus.empty) {
+                          return Center(
+                            child: Text(
+                              S.of(context).noCategoriesAvailableAtTheMoment,
+                              style: Styles().smallText.copyWith(color: Colors.white),
+                            ),
+                          );
+                        }
+
+                        final categories = controller.companyCategories;
+
+                        return Align(
+                          alignment: AlignmentDirectional.topStart,
+                          child: Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            alignment: WrapAlignment.start,
+                            children: categories.map((cat) {
+                              final isSelected = cat == selectedCategory;
+
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() => selectedCategory = cat);
+                                },
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 250),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 10,
                                   ),
-                                  // style: TextStyle(color: Colors.white),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(30),
+                                    color: isSelected
+                                        ? primary
+                                        : Colors.white.withAlpha(25),
+                                    boxShadow: isSelected
+                                        ? [
+                                      BoxShadow(
+                                        color: glow.withAlpha(140),
+                                        blurRadius: 14,
+                                      ),
+                                    ]
+                                        : [],
+                                  ),
+                                  child: Text(
+                                    cat.localizedName,
+                                    style: Styles().smallText.copyWith(
+                                      color: Colors.white,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            );
-                          }).toList(),
+                              );
+                            }).toList(),
+                          ),
+                        );
+                      },
                     ),
                     Obx(() {
                       return errorCategoryMessage.isNotEmpty
@@ -323,16 +363,20 @@ class _BuildCompanyScreenState extends State<BuildCompanyScreen>
                       controller: _descController,
                       focusNode: _descFocus,
                       keyboardType: TextInputType.multiline,
-                      label: 'Short Description',
+                      label: S.of(context).shortDescription,
                       hint:
-                          'Describe what makes your company unique and powerful...',
+                          S
+                              .of(context)
+                              .describeWhatMakesYourCompanyUniqueAndPowerful,
                       maxLines: 4,
                       onSubmitted:
                           (v) => FocusManager.instance.primaryFocus?.unfocus(),
                       validator: (v) {
                         if (v == null || v.isEmpty) {
                           errorDescMessage.value =
-                              'Tell us what makes your company unique and exciting!';
+                              S
+                                  .of(context)
+                                  .tellUsWhatMakesYourCompanyUniqueAndExciting;
                           return "";
                         }
                         return null;
@@ -353,34 +397,35 @@ class _BuildCompanyScreenState extends State<BuildCompanyScreen>
                         return Transform.scale(
                           scale: _scaleAnimation.value,
                           child: GestureDetector(
-                            onTap: () {
+                            onTap: () async {
                               _cleanError();
                               bool isValid = true;
+
                               if (!_key.currentState!.validate()) {
                                 isValid = false;
                               }
-                              if (selectedCategory.isEmpty) {
+
+                              if (selectedCategory == null) {
                                 errorCategoryMessage.value =
-                                    'Pick a category to show what your company is all about!';
+                                    S.of(context).pickACategoryToShowWhatYourCompanyIsAll;
                                 isValid = false;
                               }
 
                               if (logoFile == null) {
                                 errorLogoMessage.value =
-                                    'Please add your company logo!';
+                                    S.of(context).pleaseAddYourCompanyLogo;
                                 isValid = false;
                               }
-                              if (isValid) {
-                                AppNavigator.of(context).push(
-                                  CompanyOverviewScreen(
-                                    logoFile: logoFile,
-                                    companyName: _companyNameController.text,
-                                    founderName: _founderNameController.text,
-                                    category: selectedCategory,
-                                    description: _descController.text,
-                                  ),
-                                );
-                              }
+
+                              if (!isValid) return;
+                              await _companyController.buildCompany(
+                                name: _companyNameController.text.trim(),
+                                categoryId: selectedCategory!.id.toString(),
+                                founderName: _founderNameController.text.trim(),
+                                description: _descController.text.trim(),
+                                logo: logoFile!, categoryName: selectedCategory!.localizedName,
+                              );
+
                             },
                             child: Container(
                               padding: EdgeInsets.symmetric(
@@ -401,7 +446,7 @@ class _BuildCompanyScreenState extends State<BuildCompanyScreen>
                                 ],
                               ),
                               child: Text(
-                                'Launch Company 🚀',
+                                S.of(context).launchCompany,
                                 style: Styles().buttonText,
                               ),
                             ),
@@ -438,6 +483,79 @@ class _BuildCompanyScreenState extends State<BuildCompanyScreen>
         maxLines: 2,
         textAlign: TextAlign.center,
       ),
+    );
+  }
+
+  Widget _backButton() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(30),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Material(
+          color: Colors.white.withAlpha(20),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(30),
+            onTap: () {
+               AppNavigator.of(context).pop();
+            },
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white.withAlpha(40)),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFF7AAB).withAlpha(60),
+                    blurRadius: 16,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: Icon(
+               Icons.arrow_back,
+                size: 16,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+class CompanyCategoriesShimmer extends StatelessWidget {
+  const CompanyCategoriesShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: List.generate(6, (index) {
+        return Shimmer.fromColors(
+          baseColor: Colors.white.withAlpha(25),
+          highlightColor: Colors.white.withAlpha(60),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 10,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30),
+              color: Colors.white,
+            ),
+            child: const Text(
+              'ــــــــــــ',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        );
+      }),
     );
   }
 }

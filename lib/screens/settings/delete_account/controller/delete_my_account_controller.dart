@@ -5,17 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:read_and_listen_app/configuration/api_end_point.dart';
-import 'package:read_and_listen_app/configuration/app_colors.dart';
-import 'package:read_and_listen_app/configuration/constant_values.dart';
-import 'package:read_and_listen_app/configuration/current_session.dart';
-import 'package:read_and_listen_app/generated/l10n.dart';
-import 'package:read_and_listen_app/screens/edit_profile/controller/edit_profile_controller.dart';
-import 'package:read_and_listen_app/screens/library/controller/library_controller.dart';
-import 'package:read_and_listen_app/screens/login/view/login_screen.dart';
-import 'package:read_and_listen_app/utils/helpers/app_navigation.dart';
-import 'package:read_and_listen_app/utils/helpers/general.dart';
-import 'package:read_and_listen_app/utils/helpers/progress_hud.dart';
+import 'package:money_maker/controllers/api_end_point.dart';
+import 'package:money_maker/controllers/app_colors.dart';
+import 'package:money_maker/controllers/app_navigation.dart';
+import 'package:money_maker/controllers/constant_values.dart';
+import 'package:money_maker/controllers/current_session.dart';
+import 'package:money_maker/generated/l10n.dart';
+import 'package:money_maker/screens/login/view/login_screen.dart';
+import 'package:money_maker/widgets/helpers/progress_hud.dart';
 import 'package:sizer/sizer.dart';
 
 class DeleteMyAccount extends GetxController {
@@ -23,7 +20,7 @@ class DeleteMyAccount extends GetxController {
     try {
       ProgressHud.shared.startLoading(Get.context!);
       final url = Uri.parse(ApiEndPoint.DELETE_ACCOUNT_URL);
-      final token = GetStorage().read(ConstantValues.TOKEN_ID);
+      final token = GetStorage().read(ConstantValues.TOKEN);
       final body = {
         "password": GetStorage().read(ConstantValues.USER_PASSWORD),
       };
@@ -48,11 +45,6 @@ class DeleteMyAccount extends GetxController {
         if (data['status'] == true) {
           CurrentSession().clear();
           GetStorage().erase();
-          await General.savePrefBool(ConstantValues.USE_AUTO_LOGIN, false);
-          await General.savePrefBool(ConstantValues.USE_BIOMETRIC, false);
-
-          Get.delete<EditProfileController>();
-          Get.delete<LibraryController>();
           AwesomeDialog(
             context: Get.context!,
             dialogType: DialogType.success,
@@ -61,16 +53,14 @@ class DeleteMyAccount extends GetxController {
             dismissOnBackKeyPress: false,
             title: S.of(Get.context!).yourAccountHasBeenDeletedSuccessfully,
             titleTextStyle: TextStyle(
-              fontSize: 15.sp,
-              color: AppColors.primaryBrandColor,
+              fontSize: 16.sp,
+              color: Colors.black,
             ),
             btnOkText: S.of(Get.context!).ok,
             btnOkOnPress: () {
               GetStorage().erase();
               CurrentSession().clear();
-              AppNavigator.of(
-                Get.context!,
-              ).pushAndRemoveUntil(const LoginScreen());
+              AppNavigator.of(Get.context!).pushAndRemoveUntil(LoginScreen());
             },
           ).show();
         } else {
@@ -84,7 +74,7 @@ class DeleteMyAccount extends GetxController {
             title: data['message'],
             titleTextStyle: TextStyle(
               fontSize: 15.sp,
-              color: AppColors.primaryBrandColor,
+              color: AppColors.darkBrandColor,
             ),
             btnOkText: S.of(Get.context!).ok,
             btnOkColor: Colors.red,

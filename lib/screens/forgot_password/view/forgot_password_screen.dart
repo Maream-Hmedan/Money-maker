@@ -99,7 +99,6 @@ class ForgotPasswordScreen extends StatelessWidget {
                 Text(S.of(context).goBackTo, style: Styles().midText),
                 GestureDetector(
                     onTap: (){
-                      _forgetPass.forgotPassword(email: _emailController.text.trim());
                       AppNavigator.of(context).push(LoginScreen());
                     },
                     child: Text(S.of(context).signIn, style: Styles().mainText)),

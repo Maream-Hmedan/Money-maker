@@ -4,6 +4,7 @@ class RegisterRequest {
   final String email;
   final String password;
   final String name;
+  final String companyName;
   final String passwordConfirmation;
   final String phoneNumber;
   final String countryId;
@@ -12,6 +13,7 @@ class RegisterRequest {
     required this.email,
     required this.password,
     required this.name,
+    required this.companyName,
     required this.passwordConfirmation,
     required this.phoneNumber,
     required this.countryId,
@@ -25,6 +27,7 @@ class RegisterRequest {
     email: json["email"],
     password: json["password"],
     name: json["name"],
+    companyName: json["company_name"],
     passwordConfirmation: json["password_confirmation"],
     phoneNumber: json["phone_number"],
     countryId: json["country_id"],
@@ -34,6 +37,7 @@ class RegisterRequest {
     "email": email,
     "password": password,
     "name": name,
+    "company_name": companyName,
     "password_confirmation": passwordConfirmation,
     "phone_number": phoneNumber,
     "country_id": countryId,
